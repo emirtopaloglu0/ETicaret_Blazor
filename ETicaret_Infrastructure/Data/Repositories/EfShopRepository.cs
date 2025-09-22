@@ -29,15 +29,21 @@ namespace ETicaret_Infrastructure.Data.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddShopUser(ShopUser shopUser)
+        public async Task<bool> AddShopUser(ShopUser shopUser)
         {
+            var user = await _context.Users.FindAsync(shopUser.UserId);
+            if (user.Role != "shopUser")
+            {
+                return false;
+            }
             var entityShopUser = new Entities.ShopUser
             {
-                UserId = shopUser.Id,
+                UserId = shopUser.UserId,
                 ShopId = shopUser.ShopId
             };
             _context.ShopUsers.Add(entityShopUser);
             await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task DeleteAsync(int id)

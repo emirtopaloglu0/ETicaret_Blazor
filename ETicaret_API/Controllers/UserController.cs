@@ -38,6 +38,14 @@ namespace ETicaret_API.Controllers
             });
         }
 
+        [Authorize(Roles = "admin")]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var response = _authService.GetLoggedUser(id);
+            return Ok(response);
+        }
+
         [HttpPut("me")]
         public async Task<IActionResult> UpdateCurrentUser(UpdateUserRequest request)
         {

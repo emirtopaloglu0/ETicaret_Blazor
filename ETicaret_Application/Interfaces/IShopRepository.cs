@@ -10,7 +10,7 @@ namespace ETicaret_Application.Interfaces
     public interface IShopRepository
     {
         Task AddAsync(Shop shop);
-        Task AddShopUser(ShopUser shopUser);
+        Task<bool> AddShopUser(ShopUser shopUser);
         Task<List<Shop>> GetShops();
         Task<Shop> GetByIdShop(int id);
         Task UpdateAsync(int id, Shop shop);

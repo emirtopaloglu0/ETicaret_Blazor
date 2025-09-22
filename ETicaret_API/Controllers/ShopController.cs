@@ -59,8 +59,9 @@ namespace ETicaret_API.Controllers
                 UserId = shopUserRequest.userId,
                 ShopId = shopUserRequest.shopId
             };
-            await _shopRepository.AddShopUser(shopUser);
-            return Ok();
+            var response = await _shopRepository.AddShopUser(shopUser);
+            if (response) return Ok("Kayıt Başarılı");
+            else return BadRequest("Bu kullanıcı, mağaza kullanıcısı değil");
         }
 
         [Authorize(Roles = "admin,shopUser")]
