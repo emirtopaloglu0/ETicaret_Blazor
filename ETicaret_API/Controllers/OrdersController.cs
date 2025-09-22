@@ -8,6 +8,7 @@ namespace ETicaret_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrdersController : ControllerBase
     {
         private readonly CreateOrderUseCase _createOrder;
@@ -20,6 +21,7 @@ namespace ETicaret_API.Controllers
         }
 
 
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateOrderDto dto)
         {
