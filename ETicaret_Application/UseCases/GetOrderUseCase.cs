@@ -1,4 +1,4 @@
-﻿using ETicaret_Application.DTOs;
+﻿using ETicaret_Application.DTOs.OrderDTOs;
 using ETicaret_Application.Interfaces;
 using ETicaret_Application.Services;
 using ETicaret_Core.Entities;
@@ -57,6 +57,26 @@ namespace ETicaret_Application.UseCases
                 });
             }
             return getOrderDtos;
+        }
+
+        public async Task<GetOrderWithItemsDto> ExecuteWithItemsAsync(int id)
+        {
+            //if (_currentUser.UserId == null) throw new UnauthorizedAccessException();
+            var response = await _orderRepo.GetWithItemsAsync(id);
+            //if (_currentUser.UserId != response.UserId) throw new UnauthorizedAccessException();
+            var getOrderWithItem = new GetOrderWithItemsDto
+            {
+                OrderDate = response.OrderDate,
+                TotalAmount = response.TotalAmount,
+                Status = response.Status,
+                CompanyName = response.DeliveryCompanyName,
+                CompanyId = response.DeliveryCompanyId,
+                Items = response.orderItems
+            };
+
+            return getOrderWithItem;
+
+
         }
     }
 }

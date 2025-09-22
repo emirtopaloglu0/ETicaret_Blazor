@@ -12,5 +12,6 @@ namespace ETicaret_Application.Interfaces
         Task<Order?> GetByIdAsync(int id);
         Task AddAsync(Order order);
         Task<List<Order>?> GetOrdersAsync();
+        Task<Order?> GetWithItemsAsync(int id);
     }
 }

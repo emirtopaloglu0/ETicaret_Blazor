@@ -1,4 +1,4 @@
-﻿using ETicaret_Application.DTOs;
+﻿using ETicaret_Application.DTOs.ProductDTOs;
 using ETicaret_Application.Interfaces;
 using ETicaret_Application.Services;
 using System;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ETicaret_Application.DTOs
+namespace ETicaret_Application.DTOs.OrderDTOs
 {
     public class CreateOrderItemDto
     {

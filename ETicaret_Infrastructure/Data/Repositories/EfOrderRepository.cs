@@ -60,7 +60,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
 
         public async Task<List<ETicaret_Core.Entities.Order>?> GetOrdersAsync()
         {
-            var db = await _context.Orders.Include(x=>x.DeliveryCompany).ToListAsync();
+            var db = await _context.Orders.Include(x => x.DeliveryCompany).ToListAsync();
             List<ETicaret_Core.Entities.Order> dtoList = new List<ETicaret_Core.Entities.Order>();
             foreach (var dbOrder in db)
             {
@@ -77,6 +77,36 @@ namespace ETicaret_Infrastructure.Data.Repositories
                 });
             }
             return dtoList;
+        }
+
+        public async Task<ETicaret_Core.Entities.Order?> GetWithItemsAsync(int id)
+        {
+            var dbOrder = await _context.Orders.Include(x => x.OrderItems)
+                .Include(x => x.DeliveryCompany)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (dbOrder == null) return null;
+            List<ETicaret_Core.Entities.OrderItem> orderItemsList = new List<ETicaret_Core.Entities.OrderItem>();
+            foreach (var item in dbOrder.OrderItems)
+            {
+                var orderItem = new ETicaret_Core.Entities.OrderItem(item.ProductId, item.Quantity, item.UnitPrice)
+                {
+                    Id = item.Id,
+                    OrderId = item.OrderId,
+                };
+                orderItemsList.Add(orderItem);
+            }
+            var domain = new ETicaret_Core.Entities.Order
+            {
+                Id = dbOrder.Id,
+                OrderDate = dbOrder.OrderDate,
+                TotalAmount = dbOrder.TotalAmount,
+                Status = dbOrder.Status,
+                ShippingAddress = dbOrder.ShippingAddress,
+                DeliveryCompanyId = dbOrder.DeliveryCompanyId,
+                DeliveryCompanyName = dbOrder.DeliveryCompany.Name,
+                orderItems = orderItemsList
+            };
+            return domain;
         }
     }
 }

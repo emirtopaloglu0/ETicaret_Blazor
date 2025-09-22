@@ -1,4 +1,4 @@
-﻿using ETicaret_Application.DTOs;
+﻿using ETicaret_Application.DTOs.ProductDTOs;
 using ETicaret_Application.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
