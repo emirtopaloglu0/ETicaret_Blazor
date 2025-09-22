@@ -31,39 +31,8 @@ public class AuthController : ControllerBase
         return Ok(new { Token = token });
     }
 
-    [Authorize]
-    [HttpGet("me")]
-    public async Task<IActionResult> GetCurrentUser()
-    {
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var user = await _authService.GetLoggedUser(userId);
-
-        if (user == null)
-            return NotFound();
-
-        return Ok(new
-        {
-            user.Id,
-            user.Email,
-            user.FirstName,
-            user.LastName,
-            user.Role
-        });
-    }
-
-    [Authorize(Roles = "admin")]
-    [HttpPut("me/{id}")]
-    public async Task<IActionResult> UpdateCurrentUser(int id, UpdateUserRequest request)
-    {
-        //var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var user = await _authService.UpdateUserAsync
-            (id, request.Email, request.FirstName, request.LastName, request.Password, request.role);
-
-        return NoContent();
-    }
 
 }
 
 public record RegisterRequest(string Email, string FirstName, string LastName, string Password);
 public record LoginRequest(string Email, string Password);
-public record UpdateUserRequest(string Email, string FirstName, string LastName, string Password, string role);

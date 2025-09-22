@@ -20,6 +20,7 @@ namespace ETicaret_API.Controllers
             _productCategoryRepository = productCategoryRepository;
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateProductCategoryDto dto)
         {
@@ -57,6 +58,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {

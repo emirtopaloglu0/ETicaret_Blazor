@@ -1,8 +1,10 @@
 ﻿using ETicaret_Application.DTOs.OrderDTOs;
+using ETicaret_Application.Interfaces;
 using ETicaret_Application.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.Security.Claims;
 
 namespace ETicaret_API.Controllers
@@ -14,15 +16,15 @@ namespace ETicaret_API.Controllers
     {
         private readonly CreateOrderUseCase _createOrder;
         private readonly GetOrderUseCase _getOrder;
-
-        public OrdersController(CreateOrderUseCase createOrder, GetOrderUseCase getOrder)
+        private readonly IOrderRepository _orderRepository;
+        public OrdersController(CreateOrderUseCase createOrder, GetOrderUseCase getOrder, IOrderRepository orderRepository)
         {
             _createOrder = createOrder;
             _getOrder = getOrder;
+            _orderRepository = orderRepository;
         }
 
 
-        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateOrderDto dto)
         {
@@ -38,7 +40,6 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpGet("byUser")]
         public async Task<ActionResult<IEnumerable<List<GetOrderDto>>>> GetOrders(int id)
         {
@@ -58,6 +59,16 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "deliverer,admin")]
+        [HttpPut("updateCargo/{id}")]
+        public async Task<ActionResult> UpdateStatus(int id, string status)
+        {
+            //Kargocular comboboxtan seçerek yapar burayı.
+            await _orderRepository.UpdateCargoStatus(id, status);
+            return Ok();
+        }
+
+        private record UpdateCargoStatus(string status);
 
     }
 }

@@ -13,5 +13,6 @@ namespace ETicaret_Application.Interfaces
         Task AddAsync(Order order);
         Task<List<Order>?> GetOrdersAsync(int userId);
         Task<Order?> GetWithItemsAsync(int id);
+        Task UpdateCargoStatus(int id, string status);
     }
 }

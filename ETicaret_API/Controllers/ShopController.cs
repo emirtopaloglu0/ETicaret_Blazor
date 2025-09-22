@@ -1,5 +1,6 @@
 ﻿using ETicaret_Application.Interfaces;
 using ETicaret_Core.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -9,15 +10,16 @@ namespace ETicaret_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ShopController : ControllerBase
     {
-
         private readonly IShopRepository _shopRepository;
 
         public ShopController(IShopRepository shopRepository)
         {
             _shopRepository = shopRepository;
         }
+
         // GET: api/<ShopController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<List<Shop>>>> Get()
@@ -34,6 +36,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "admin")]
         // POST api/<ShopController>
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] PostRequest postRequest)
@@ -46,7 +49,21 @@ namespace ETicaret_API.Controllers
             await _shopRepository.AddAsync(shop);
             return Ok();
         }
+        [Authorize(Roles = "admin")]
+        // POST api/<ShopController>
+        [HttpPost("shopUser")]
+        public async Task<ActionResult> AddShopUser([FromBody] ShopUserRequest shopUserRequest)
+        {
+            ShopUser shopUser = new ShopUser
+            {
+                UserId = shopUserRequest.userId,
+                ShopId = shopUserRequest.shopId
+            };
+            await _shopRepository.AddShopUser(shopUser);
+            return Ok();
+        }
 
+        [Authorize(Roles = "admin,shopUser")]
         // PUT api/<ShopController>/5
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromBody] PostRequest postRequest)
@@ -60,6 +77,7 @@ namespace ETicaret_API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "admin")]
         // DELETE api/<ShopController>/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
@@ -71,3 +89,5 @@ namespace ETicaret_API.Controllers
 }
 
 public record PostRequest(string Name, string Desc);
+public record ShopUserRequest(int userId, int shopId);
+

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ETicaret_Application.DTOs;
+using System.Globalization;
 
 
 namespace ETicaret_Infrastructure.Data.Repositories
@@ -108,6 +109,12 @@ namespace ETicaret_Infrastructure.Data.Repositories
                 orderItems = orderItemsList
             };
             return domain;
+        }
+        public async Task UpdateCargoStatus(int id, string status)
+        {
+            var order = _context.Orders.Find(id);
+            order.Status = status;
+            await _context.SaveChangesAsync();
         }
     }
 }

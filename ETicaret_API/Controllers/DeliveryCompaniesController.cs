@@ -1,6 +1,7 @@
 ﻿using ETicaret_Application.DTOs.OrderDTOs;
 using ETicaret_Application.Interfaces;
 using ETicaret_Core.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace ETicaret_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DeliveryCompaniesController : ControllerBase
     {
         private readonly IDeliveryCompanyRepository _companyRepository;
@@ -23,7 +25,6 @@ namespace ETicaret_API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<List<DeliveryCompany>>>> Get()
         {
-
             var response = await _companyRepository.GetDeliveryCompanies();
             return Ok(response);
         }
@@ -36,6 +37,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "admin")]
         // POST api/<DeliveryCompaniesController>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] string Name)
@@ -48,6 +50,7 @@ namespace ETicaret_API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "admin")]
         // PUT api/<DeliveryCompaniesController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] string Name)
@@ -56,6 +59,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = "admin")]
         // DELETE api/<DeliveryCompaniesController>/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
