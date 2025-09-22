@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ETicaret_Application.DTOs.ProductDTOs
+namespace ETicaret_Core.Entities
 {
-    public class GetProductCategoryDto
+    public class Shop
     {
         public int Id { get; set; }
+
         public string Name { get; set; } = null!;
 
         public string Description { get; set; } = null!;

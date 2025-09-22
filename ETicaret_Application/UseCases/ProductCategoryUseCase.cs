@@ -62,5 +62,16 @@ namespace ETicaret_Application.UseCases
             };
             return domain;
         }
+
+        public async Task<GetProductCategoryDto?> ExecuteUpdateCategory(int id, string name, string description)
+        {
+            var response = await _productCategoryRepository.UpdateCategory(id, name, description);
+            return new GetProductCategoryDto
+            {
+                Id = response.Id,
+                Name = response.Name,
+                Description = response.Description
+            };
+        }
     }
 }

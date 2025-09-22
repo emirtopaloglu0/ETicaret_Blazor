@@ -1,4 +1,5 @@
-﻿using ETicaret_Core.Entities;
+﻿using ETicaret_Application.DTOs.ProductDTOs;
+using ETicaret_Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,7 @@ namespace ETicaret_Application.Interfaces
         Task<ProductCategory?> GetById(int id);
         Task AddAsync(ProductCategory productCategory);
         Task<List<ProductCategory>?> GetCategoriesAsync();
+        Task<GetProductCategoryDto> UpdateCategory(int id, string name, string description);
+        Task DeleteCategory(int id);
     }
 }

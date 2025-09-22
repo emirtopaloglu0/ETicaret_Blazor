@@ -1,4 +1,5 @@
-﻿using ETicaret_Application.Interfaces;
+﻿using ETicaret_Application.DTOs.ProductDTOs;
+using ETicaret_Application.Interfaces;
 using ETicaret_Core.Entities;
 using ETicaret_Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
             };
             return domain;
         }
+
         public async Task<List<ProductCategory>> GetCategoriesAsync()
         {
             var dbCategories = await _context.ProductCategories.ToListAsync();
@@ -52,6 +54,26 @@ namespace ETicaret_Infrastructure.Data.Repositories
             }
 
             return productCategories;
+        }
+        public async Task<GetProductCategoryDto> UpdateCategory(int id, string name, string description)
+        {
+            var db = await _context.ProductCategories.FindAsync(id);
+            db.Name = name;
+            db.Description = description;
+            await _context.SaveChangesAsync();
+            return new GetProductCategoryDto()
+            {
+                Id = db.Id,
+                Name = db.Name,
+                Description = db.Description,
+            };
+        }
+        public async Task DeleteCategory(int id)
+        {
+            var category = await _context.ProductCategories.FindAsync(id);
+            _context.ProductCategories.Remove(category);
+            await _context.SaveChangesAsync();
+
         }
     }
 }

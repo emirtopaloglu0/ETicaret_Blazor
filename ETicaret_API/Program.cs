@@ -27,6 +27,8 @@ builder.Services.AddDbContext<ETicaretDbContext>(options =>
 builder.Services.AddScoped<IOrderRepository, EfOrderRepository>();
 builder.Services.AddScoped<IProductRepository, EfProductRepository>();
 builder.Services.AddScoped<IProductCategoryRepository, EfProductCategoryRepository>();
+builder.Services.AddScoped<IDeliveryCompanyRepository, EfDeliveryCompanyRepository>();
+builder.Services.AddScoped<IShopRepository, EfShopRepository>();
 // HttpContext’e erişim için
 builder.Services.AddHttpContextAccessor();
 
