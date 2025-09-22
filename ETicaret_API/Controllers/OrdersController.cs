@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ETicaret_Application.DTOs.OrderDTOs;
+using ETicaret_Application.UseCases;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ETicaret_Application.UseCases;
-using ETicaret_Application.DTOs.OrderDTOs;
+using System.Security.Claims;
 
 namespace ETicaret_API.Controllers
 {
@@ -37,10 +38,16 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<List<GetOrderDto>>>> GetOrders()
+        [Authorize]
+        [HttpGet("byUser")]
+        public async Task<ActionResult<IEnumerable<List<GetOrderDto>>>> GetOrders(int id)
         {
-            var response = await _getOrder.ExecuteListAsync();
+            int userId = id;
+            if (User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "customer"))
+            {
+                userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            }
+            var response = await _getOrder.ExecuteListAsync(userId);
             return Ok(response);
         }
 

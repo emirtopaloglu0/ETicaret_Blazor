@@ -1,4 +1,6 @@
-﻿using ETicaret_Application.Interfaces;
+﻿using Azure.Core;
+using ETicaret_Application.DTOs.UserDTOs;
+using ETicaret_Application.Interfaces;
 using ETicaret_Core.Entities;
 using ETicaret_Infrastructure.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -62,7 +64,38 @@ public class AuthService : IAuthService
             expires: DateTime.UtcNow.AddHours(2),
             signingCredentials: creds
         );
-
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public async Task<LoggedUserDto> GetLoggedUser(int id)
+    {
+        var user = await _context.Users.FindAsync(id);
+        return new LoggedUserDto
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Id = user.Id,
+            Email = user.Email,
+            Role = user.Role
+        };
+    }
+    public async Task<bool> UpdateUserAsync(int id, string email, string FirstName, string LastName, string password, string role = "customer")
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(id);
+            user.Email = email;
+            user.FirstName = FirstName;
+            user.LastName = LastName;
+            user.Password = BCrypt.Net.BCrypt.HashPassword(password);
+            user.Role = role;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+
     }
 }

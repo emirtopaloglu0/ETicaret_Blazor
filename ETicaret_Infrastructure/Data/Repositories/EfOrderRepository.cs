@@ -50,6 +50,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
             if (db == null) return null;
             var domain = new ETicaret_Core.Entities.Order
             {
+                Id = db.Id,
                 OrderDate = db.OrderDate,
                 TotalAmount = db.TotalAmount,
                 Status = db.Status
@@ -58,9 +59,9 @@ namespace ETicaret_Infrastructure.Data.Repositories
             return domain;
         }
 
-        public async Task<List<ETicaret_Core.Entities.Order>?> GetOrdersAsync()
+        public async Task<List<ETicaret_Core.Entities.Order>?> GetOrdersAsync(int userId)
         {
-            var db = await _context.Orders.Include(x => x.DeliveryCompany).ToListAsync();
+            var db = await _context.Orders.Include(x => x.DeliveryCompany).Where(x => x.UserId == userId).ToListAsync();
             List<ETicaret_Core.Entities.Order> dtoList = new List<ETicaret_Core.Entities.Order>();
             foreach (var dbOrder in db)
             {

@@ -32,6 +32,7 @@ namespace ETicaret_Application.UseCases
             var response = await _orderRepo.GetByIdAsync(id);
             var test = new GetOrderDto
             {
+                Id = response.Id,
                 OrderDate = response.OrderDate,
                 TotalAmount = response.TotalAmount,
                 Status = response.Status
@@ -39,16 +40,17 @@ namespace ETicaret_Application.UseCases
             return test;
         }
 
-        public async Task<List<GetOrderDto>> ExecuteListAsync()
+        public async Task<List<GetOrderDto>> ExecuteListAsync(int userId)
         {
             //if (_currentUser.UserId == null) throw new UnauthorizedAccessException();
 
-            var response = await _orderRepo.GetOrdersAsync();
+            var response = await _orderRepo.GetOrdersAsync(userId);
             List<GetOrderDto> getOrderDtos = new List<GetOrderDto>();
             foreach (var item in response)
             {
                 getOrderDtos.Add(new GetOrderDto
                 {
+                    Id = item.Id,
                     OrderDate = item.OrderDate,
                     TotalAmount = item.TotalAmount,
                     Status = item.Status,
