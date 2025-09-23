@@ -1,0 +1,46 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<h3>Login</h3>
+
+<div class="mb-3">
+    <input placeholder="Email" @bind="Email" class="form-control" />
+</div>
+<div class="mb-3">
+    <input placeholder="Password" type="password" @bind="Password" class="form-control" />
+</div>
+<button class="btn btn-primary" @onclick="LoginUser">Login</button>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="text-danger">@ErrorMessage</div>
+}
+
+@code {
+    private string Email = "";
+    private string Password = "";
+    private string ErrorMessage = "";
+
+    private async Task LoginUser()
+    {
+        ErrorMessage = "";
+
+        var payload = new { Email, Password };
+        var response = await RequestManager.PostAsync<object, LoginResponse>(ApiSettings.Login, payload);
+
+        if (response == null || string.IsNullOrEmpty(response.Token))
+        {
+            ErrorMessage = "Login failed";
+            return;
+        }
+
+        await AuthProvider.MarkUserAsAuthenticated(response.Token);
+        navigationManager.NavigateTo("/");
+    }
+
+    public class LoginResponse
+    {
+        public string? Token { get; set; }
+    }
+}

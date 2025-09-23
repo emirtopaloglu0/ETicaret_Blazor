@@ -8,3 +8,12 @@
 @using Microsoft.JSInterop
 @using ETicaret_UI
 @using ETicaret_UI.Components
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager navigationManager;
+@inject ETicaret_UI.Auth.CustomAuthenticationStateProvider AuthProvider
+@inject ETicaret_UI.Services.RequestManager RequestManager
+@inject ETicaret_UI.Settings.ApiSettings ApiSettings
+@using System.Text.Json
+
+

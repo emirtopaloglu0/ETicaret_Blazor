@@ -1,4 +1,8 @@
-﻿<nav class="navbar navbar-expand-lg bg-body-tertiary m-2">
+﻿@using System.Security.Claims
+@inject ETicaret_UI.Services.RequestManager RequestManager
+@rendermode InteractiveServer
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary m-2">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">E-Ticaret</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +35,15 @@
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
                 <button class="btn btn-outline-success" type="submit">Search</button>
             </form> *@
-            <a class="d-flex btn btn-info" href="#">Giriş Yap</a>
+
+            <AuthorizeView>
+                <Authorized>
+                    <a class="d-flex btn btn-danger" href="logout">Çıkış Yap</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a class="d-flex btn btn-info" href="login">Giriş Yap</a>
+                </NotAuthorized>
+            </AuthorizeView>
 
         </div>
     </div>

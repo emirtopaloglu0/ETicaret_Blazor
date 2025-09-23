@@ -1,4 +1,6 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
 
 <PageTitle>Home</PageTitle>
 
@@ -7,5 +9,47 @@
     <h1>Ana sayfa</h1>
 
     ürünler gösterilecek...
+    <AuthorizeView>
+        <Authorized>
+            Genel Test <br />
+            @firstName @lastName
+        </Authorized>
+        <NotAuthorized>
+            Giriş Yapılmadı
+        </NotAuthorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="admin">
+        <Authorized>
+            Admin Test
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="customer">
+        <Authorized>
+            Customer Test
+        </Authorized>
+    </AuthorizeView>
+    <AuthorizeView Roles="shopUser">
+        <Authorized>
+            Shop User Test
+        </Authorized>
+    </AuthorizeView>
 </div>
 
+@code {
+    string? firstName = string.Empty;
+    string? lastName = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var response = await RequestManager.GetAsync<JsonElement>(ApiSettings.GetCurrentUser);
+            firstName = response.GetProperty("firstName").GetString();
+            lastName = response.GetProperty("lastName").GetString();
+
+        }
+    }
+
+}
