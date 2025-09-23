@@ -4,15 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ETicaret_Core.Entities
+namespace ETicaret_Application.DTOs.ProductDTOs
 {
-    public class Product
+    public class ProductDTO
     {
         public int Id { get; set; }
 
         public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
+        public string CategoryDesc { get; set; }
 
         public int ShopId { get; set; }
+        public string ShopName { get; set; }
+        public string ShopDesc { get; set; }
 
         public string Name { get; set; } = null!;
 
@@ -25,6 +29,5 @@ namespace ETicaret_Core.Entities
         public string? ImageUrl { get; set; }
         public bool IsDelete { get; set; }
 
-        public DateTime CreatedAt { get; set; }
     }
 }

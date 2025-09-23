@@ -1,0 +1,124 @@
+﻿using ETicaret_Application.Interfaces;
+using ETicaret_Core.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Threading.Tasks;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+namespace ETicaret_API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class ProductController : ControllerBase
+    {
+
+        private readonly IProductRepository _productRepository;
+
+        public ProductController(IProductRepository productRepository)
+        {
+            _productRepository = productRepository;
+        }
+
+        // GET: api/<ProductController>
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var response = await _productRepository.GetAllProduct();
+            if (response == null)
+            {
+                return NotFound();
+            }
+            return Ok(response);
+        }
+
+        // GET api/<ProductController>/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var response = await _productRepository.GetByIdAsync(id);
+            if (response == null) { return NotFound(); }
+            return Ok(response);
+        }
+
+        [HttpGet("byCategory/{categoryId}")]
+        public async Task<IActionResult> GetByCategory(int categoryId)
+        {
+            var response = await _productRepository.GetByCategoryIdAsync(categoryId);
+            if (response == null) { return NotFound(); }
+            return Ok(response);
+        }
+
+        [HttpGet("byShop/{shopId}")]
+        public async Task<IActionResult> GetByShop(int shopId)
+        {
+            var response = await _productRepository.GetByShopIdAsync(shopId);
+            if (response == null) { return NotFound(); }
+            return Ok(response);
+        }
+
+        // POST api/<ProductController>
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] _product _product)
+        {
+            Product product = new Product
+            {
+                CategoryId = _product.CategoryId,
+                ShopId = _product.ShopId,
+                Name = _product.Name,
+                Description = _product.Description,
+                Stock = _product.Stock,
+                Price = _product.Price,
+                ImageUrl = _product.ImageUrl,
+                IsDelete = false
+            };
+
+            var response = await _productRepository.AddAsync(product);
+            if (!response)
+            {
+                return BadRequest("Kaydetme İşlemi Başarısız!");
+            }
+            return Ok("Kayıt Başarılı");
+        }
+
+        // PUT api/<ProductController>/5
+        [Authorize(Roles = "admin,shopUser")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, [FromBody] _product _product)
+        {
+            int shopUserId = 0;
+            if (User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "shopUser"))
+            {
+                shopUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            }
+            Product product = new Product
+            {
+                CategoryId = _product.CategoryId,
+                ShopId = _product.ShopId,
+                Name = _product.Name,
+                Description = _product.Description,
+                Stock = _product.Stock,
+                Price = _product.Price,
+                ImageUrl = _product.ImageUrl,
+                IsDelete = _product.isDelete
+            };
+            var response = await _productRepository.UpdateAsync(id, product, shopUserId);
+            if (!response) { return BadRequest(); }
+            return Ok(response);
+        }
+
+        // DELETE api/<ProductController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var response = await _productRepository.DeleteAsync(id);
+            if (!response) { return BadRequest(); }
+            return Ok(response);
+        }
+        public record _product(int CategoryId, int ShopId, string Name, string Description,
+            int Stock, decimal Price, string ImageUrl, bool isDelete = false);
+    }
+}
