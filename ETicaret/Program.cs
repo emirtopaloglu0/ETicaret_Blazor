@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddCascadingAuthenticationState();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddServerSideBlazor()
@@ -28,11 +28,12 @@ builder.Services.AddAuthentication("CookieAuth")
         options.LoginPath = "/login"; // Login sayfasý
         options.AccessDeniedPath = "/AccessDenied";
         options.Cookie.HttpOnly = true;
-        //options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // HTTPS ise zorunlu
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // HTTPS ise zorunlu
         options.ExpireTimeSpan = TimeSpan.FromHours(1);
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddSingleton<ApiSettings>();
 builder.Services.AddHttpClient<RequestManager>();
@@ -40,11 +41,16 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<CustomAuthenticationStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
-    provider.GetRequiredService<CustomAuthenticationStateProvider>());
+//builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
+//    provider.GetRequiredService<CustomAuthenticationStateProvider>());
+
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+
+builder.Services.AddAuthorizationCore();
 
 // HttpClient'i service olarak ekle
 builder.Services.AddHttpClient();
+
 
 // Session ve Cache ekle
 builder.Services.AddDistributedMemoryCache(); // <-- Bu eksikti
@@ -68,10 +74,10 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -8,11 +8,17 @@
 <div class="container">
     <h1>Ana sayfa</h1>
 
+    <AuthorizeView Roles="admin">
+        <Authorized>
+            <a href="admin">Admin paneline git</a>
+        </Authorized>
+
+    </AuthorizeView>
+
     ürünler gösterilecek...
     <AuthorizeView>
         <Authorized>
-            Genel Test <br />
-            @firstName @lastName
+            Genel Test
         </Authorized>
         <NotAuthorized>
             Giriş Yapılmadı

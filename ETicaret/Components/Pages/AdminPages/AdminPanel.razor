@@ -1,0 +1,32 @@
+﻿@page "/admin"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@attribute [Authorize(Roles = "admin")]
+
+<AuthorizeView Roles="admin">
+    <Authorized>
+        <div>
+            <a href="/adminShops">Admin Shop</a>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            <ETicaret_UI.Components.Pages.AuthPages.AccessDenied />
+        }
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await AuthProvider.GetAuthenticationStateAsync();
+            StateHasChanged();
+        }
+    }
+}

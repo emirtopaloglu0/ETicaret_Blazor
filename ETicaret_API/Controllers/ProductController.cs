@@ -60,10 +60,11 @@ namespace ETicaret_API.Controllers
         }
 
         // POST api/<ProductController>
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,shopUser")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] _product _product)
         {
+            //shopUser eklerken, UI tarafında, kayıtlı olduğu shop'un ID'sini alacağız.
             Product product = new Product
             {
                 CategoryId = _product.CategoryId,

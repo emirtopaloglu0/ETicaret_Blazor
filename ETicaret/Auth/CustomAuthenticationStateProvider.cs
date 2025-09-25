@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Blazored.LocalStorage;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Authentication;
 
 namespace ETicaret_UI.Auth
 {
@@ -10,7 +11,6 @@ namespace ETicaret_UI.Auth
     {
         private readonly ILocalStorageService _localStorage;
         private readonly ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
-
         public CustomAuthenticationStateProvider(ILocalStorageService localStorage)
         {
             _localStorage = localStorage;

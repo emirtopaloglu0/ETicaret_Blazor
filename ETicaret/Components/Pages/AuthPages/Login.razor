@@ -72,6 +72,7 @@
 </style>
 
 @code {
+
     private string ErrorMessage = "";
 
     [SupplyParameterFromForm(FormName = "LoginForm")]
@@ -86,6 +87,7 @@
             var response = await RequestManager.PostAsync<LoginViewModel, LoginResponse>(ApiSettings.Login, LoginModel);
 
             await AuthProvider.MarkUserAsAuthenticated(response.Token);
+
             navigationManager.NavigateTo("/");
         }
         catch
