@@ -14,6 +14,13 @@
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="/">Ana Sayfa</a>
                 </li>
+                <AuthorizeView Roles="admin">
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="admin">Admin Paneli</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Hesabım</a>
                 </li>

@@ -18,38 +18,73 @@
                             SuccessIcon="fa fa-thumbs-up"
                             ErrorIcon="fa fa-bug" />
 
-            <h2 class="mb-4">Kargo Şirketleri</h2>
+            <!-- Başlık ve Buton -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="fw-bold">🚚 Kargo Şirketleri</h2>
+                <button class="btn btn-success shadow-sm" @onclick="ShowAddModal">
+                    <i class="fa fa-plus me-2"></i>Yeni Kargo Şirketi Ekle
+                </button>
+            </div>
 
-            <button class="btn btn-success mb-3" @onclick="ShowAddModal">Yeni Kargo Şirketi Ekle</button>
-
-            <table class="table table-striped table-hover shadow-sm rounded">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Şirket Adı</th>
-                        <th>İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in companies)
-                    {
+            <!-- Tablo -->
+            <div class="table-responsive shadow rounded">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
                         <tr>
-                            <td>@item.Name</td>
-                            <td>
-                                <button class="btn btn-primary btn-sm me-2" @onclick="() => EditCompany(item)">Düzenle</button>
-                                <button class="btn btn-danger btn-sm" @onclick="() => ShowDeleteModal(item)">Sil</button>
-                            </td>
+                            <th>Şirket Adı</th>
+                            <th class="text-center" style="width:180px;">İşlemler</th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in pagedCompanies)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditCompany(item)">
+                                        <i class="bi bi-pencil"></i> Düzenle
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(item)">
+                                        <i class="bi bi-trash"></i> Sil
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                        @if (!pagedCompanies.Any())
+                        {
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">Kayıt bulunamadı.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <button class="page-link" @onclick="PreviousPage">Önceki</button>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(currentPage == i ? "active" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+                        </li>
                     }
-                </tbody>
-            </table>
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <button class="page-link" @onclick="NextPage">Sonraki</button>
+                    </li>
+                </ul>
+            </nav>
         </div>
 
         <!-- Add / Edit Modal -->
         @if (showEditModal && selectedCompany != null)
         {
             <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-                <div class="modal-dialog">
-                    <div class="modal-content shadow-lg">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow-lg border-0 rounded-3">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title">@((isAddMode ? "Yeni Kargo Şirketi Ekle" : "Kargo Şirketini Düzenle"))</h5>
                             <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
@@ -73,8 +108,8 @@
         @if (showDeleteModal)
         {
             <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-                <div class="modal-dialog">
-                    <div class="modal-content shadow-lg">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow-lg border-0 rounded-3">
                         <div class="modal-header bg-danger text-white">
                             <h5 class="modal-title">Silme Onayı</h5>
                             <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
@@ -99,10 +134,17 @@
 
 @code {
     List<DeliveryCompanyViewModel> companies = new();
+    List<DeliveryCompanyViewModel> pagedCompanies => companies.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+
     private bool showDeleteModal = false;
     private bool showEditModal = false;
     private bool isAddMode = false;
     private DeliveryCompanyViewModel? selectedCompany;
+
+    // Pagination
+    private int currentPage = 1;
+    private int pageSize = 5;
+    private int totalPages => (int)Math.Ceiling((double)companies.Count / pageSize);
 
     async Task ReadData()
     {
@@ -116,6 +158,7 @@
                 Name = item.GetProperty("name").GetString()
             });
         }
+        currentPage = 1; // liste yenilenince sayfayı başa al
         StateHasChanged();
     }
 
@@ -157,7 +200,7 @@
         {
             if (selectedCompany == null) return;
 
-            var payload = selectedCompany.Name; // sadece string gönderiliyor!
+            var payload = selectedCompany.Name;
 
             if (isAddMode)
             {
@@ -209,5 +252,21 @@
             Console.WriteLine(ex.Message);
         }
     }
-}
 
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+            currentPage--;
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+            currentPage++;
+    }
+
+    private void GoToPage(int page)
+    {
+        currentPage = page;
+    }
+}

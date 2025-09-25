@@ -5,13 +5,68 @@
 
 <AuthorizeView Roles="admin">
     <Authorized>
-        <a href="/adminShops">Admin Shop</a> <br />
-        <a href="/adminProductCategory">Admin Categories</a>
+        <div class="container my-5">
+            <h2 class="mb-4 text-center fw-bold">📊 Admin Panel</h2>
+
+            <div class="row g-4">
+                <!-- Mağazalar -->
+                <div class="col-md-4">
+                    <a href="/adminShops" class="text-decoration-none">
+                        <div class="card shadow-sm border-0 h-100 admin-card clickable-card">
+                            <div class="card-body text-center">
+                                <i class="fa-solid fa-store fa-3x mb-3 text-primary"></i>
+                                <h5 class="card-title fw-bold text-dark">Mağazalar</h5>
+                                <p class="card-text text-muted">Tüm mağazaları görüntüle ve yönet</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Ürün Kategorileri -->
+                <div class="col-md-4">
+                    <a href="/adminProductCategory" class="text-decoration-none">
+                        <div class="card shadow-sm border-0 h-100 admin-card clickable-card">
+                            <div class="card-body text-center">
+                                <i class="fa-solid fa-tags fa-3x mb-3 text-success"></i>
+                                <h5 class="card-title fw-bold text-dark">Ürün Kategorileri</h5>
+                                <p class="card-text text-muted">Kategori ekle, düzenle veya sil</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Kargo Firmaları -->
+                <div class="col-md-4">
+                    <a href="/adminDeliveryCompanies" class="text-decoration-none">
+                        <div class="card shadow-sm border-0 h-100 admin-card clickable-card">
+                            <div class="card-body text-center">
+                                <i class="fa-solid fa-truck-fast fa-3x mb-3 text-warning"></i>
+                                <h5 class="card-title fw-bold text-dark">Kargo Firmaları</h5>
+                                <p class="card-text text-muted">Kargo firmalarını yönet</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
     </Authorized>
     <NotAuthorized>
         <ETicaret_UI.Components.Pages.AuthPages.AccessDenied />
     </NotAuthorized>
 </AuthorizeView>
+
+<style>
+    .clickable-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+        border-radius: 1rem;
+    }
+
+        .clickable-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+</style>
 
 @code {
 }
