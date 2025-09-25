@@ -35,6 +35,15 @@
 
         #endregion
 
+        #region
+        public int companyId { get; set; }
+
+        public string GetCompanies => $"{BaseUrl}DeliveryCompanies";
+        public string AddCompany => $"{BaseUrl}DeliveryCompanies";
+        public string UpdateCompany => $"{BaseUrl}DeliveryCompanies/{companyId}";
+        public string DeleteCompany => $"{BaseUrl}DeliveryCompanies/{companyId}";
+        #endregion
+
         public string Products => $"{BaseUrl}products";
 
     }
