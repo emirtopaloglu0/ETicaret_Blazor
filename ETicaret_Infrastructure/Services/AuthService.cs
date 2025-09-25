@@ -104,4 +104,10 @@ public class AuthService : IAuthService
         user.Role = role;
         await _context.SaveChangesAsync();
     }
+
+    public async Task<bool> CheckByMail(string mail)
+    {
+        return await _context.Users.AnyAsync(x => x.Email == mail);
+
+    }
 }

@@ -46,6 +46,13 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
+        [HttpGet("CheckByMail/{mail}")]
+        public async Task<bool> CheckUserByMail(string mail)
+        {
+            var response = await _authService.CheckByMail(mail);
+            return response;
+        }
+
         [HttpPut("me")]
         public async Task<IActionResult> UpdateCurrentUser(UpdateUserRequest request)
         {

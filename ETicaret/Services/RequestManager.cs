@@ -30,6 +30,11 @@ namespace ETicaret_UI.Services
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
             }
+            else
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", string.Empty);
+            }
         }
 
         public async Task<T?> GetAsync<T>(string endpoint)

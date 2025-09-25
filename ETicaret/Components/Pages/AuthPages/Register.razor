@@ -1,0 +1,128 @@
+﻿@page "/register"
+@using ETicaret_UI.Auth
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Kayıt Ol</PageTitle>
+
+<div class="container justify-content-center align-items-center ">
+    <div class="card shadow-lg border-0 rounded-5">
+        <div class="card-header text-center text-white rounded-top-5"
+             style="background: linear-gradient(135deg, #ff512f, #dd2476);">
+            <h3 class="mb-0">Kayıt Ol</h3>
+        </div>
+        <div class="card-body p-5">
+            <EditForm Model="RegisterModel" OnValidSubmit="RegisterUser" FormName="RegisterForm">
+                <DataAnnotationsValidator />
+
+                <!-- Ad -->
+                <div class="mb-3">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light">
+                            <i class="bi bi-person-fill text-secondary"></i>
+                        </span>
+                        <InputText class="form-control" placeholder="Adınız"
+                                   @bind-Value="RegisterModel.FirstName" />
+                    </div>
+                    <ValidationMessage For="() => RegisterModel.FirstName" />
+                </div>
+
+                <!-- Soyad -->
+                <div class="mb-3">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light">
+                            <i class="bi bi-person-badge-fill text-secondary"></i>
+                        </span>
+                        <InputText class="form-control" placeholder="Soyadınız"
+                                   @bind-Value="RegisterModel.LastName" />
+                    </div>
+                    <ValidationMessage For="() => RegisterModel.LastName" />
+                </div>
+
+                <!-- E-Posta -->
+                <div class="mb-3">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light">
+                            <i class="bi bi-envelope-fill text-secondary"></i>
+                        </span>
+                        <InputText type="email" class="form-control" placeholder="E-Posta"
+                                   @bind-Value="RegisterModel.Email" />
+                    </div>
+                    <ValidationMessage For="() => RegisterModel.Email" />
+                </div>
+
+                <!-- Şifre -->
+                <div class="mb-4">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light">
+                            <i class="bi bi-lock-fill text-secondary"></i>
+                        </span>
+                        <InputText type="password" class="form-control" placeholder="Şifre"
+                                   @bind-Value="RegisterModel.Password" />
+                    </div>
+                    <ValidationMessage For="() => RegisterModel.Password" />
+                </div>
+
+                <!-- Butonlar -->
+                <div class="d-grid gap-3 mt-4">
+                    <button type="submit" class="btn btn-gradient btn-lg rounded-pill shadow-sm">
+                        <i class="bi bi-person-plus me-2"></i> Kayıt Ol
+                    </button>
+                    <a href="login" class="btn btn-outline-dark btn-lg rounded-pill shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Zaten Üye misiniz? Giriş Yapın
+                    </a>
+                </div>
+            </EditForm>
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger mt-3">@ErrorMessage</div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-gradient {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        color: white;
+        border: none;
+        transition: 0.3s;
+    }
+
+        .btn-gradient:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+</style>
+
+@code {
+    private string ErrorMessage = "";
+
+    [SupplyParameterFromForm(FormName = "RegisterForm")]
+    public RegisterViewModel RegisterModel { get; set; } = new();
+
+    private async Task RegisterUser()
+    {
+        try
+        {
+            ApiSettings.mail = RegisterModel.Email;
+
+            var response = await RequestManager.GetAsync<bool>(ApiSettings.CheckByMail);
+            if (response)
+            {
+                ErrorMessage = "Bu e-posta adresiyle kayıtlı bir kullanıcı zaten var.";
+                return;
+            }
+
+            await RequestManager.PostAsync<RegisterViewModel, string>(ApiSettings.Register, RegisterModel);
+            ApiSettings.mail = string.Empty;
+            navigationManager.NavigateTo("/login");
+        }
+        catch
+        {
+            ErrorMessage = "Kayıt olurken bir hata oluştu.";
+            ApiSettings.mail = string.Empty;
+        }
+    }
+}

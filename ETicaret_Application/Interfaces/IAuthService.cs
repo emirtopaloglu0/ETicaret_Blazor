@@ -15,5 +15,6 @@ namespace ETicaret_Application.Interfaces
         Task<LoggedUserDto> GetLoggedUser(int id);
         Task<bool> UpdateUserAsync(int id, string email, string FirstName, string LastName, string password, string role = "customer");
         Task ChangeUserRole(int id, string role);
+        Task<bool> CheckByMail(string mail);
     }
 }
