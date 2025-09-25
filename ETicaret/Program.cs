@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Blazored.Toast;
 using ETicaret_UI.Auth;
 using ETicaret_UI.Components;
 using ETicaret_UI.Services;
@@ -60,6 +61,8 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+builder.Services.AddBlazoredToast();
 
 
 var app = builder.Build();

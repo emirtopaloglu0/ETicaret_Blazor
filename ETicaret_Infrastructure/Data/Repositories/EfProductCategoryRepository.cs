@@ -48,6 +48,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
             {
                 productCategories.Add(new ProductCategory
                 {
+                    Id = item.Id,
                     Name = item.Name,
                     Description = item.Description
                 });

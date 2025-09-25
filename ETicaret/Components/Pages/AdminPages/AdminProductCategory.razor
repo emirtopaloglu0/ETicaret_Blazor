@@ -1,11 +1,9 @@
-﻿@page "/adminShops"
+﻿@page "/adminProductCategory"
 @using ETicaret_UI.ViewModals
-
 @rendermode InteractiveServer
 @attribute [StreamRendering]
 
-<PageTitle>Admin Shop Panel</PageTitle>
-
+<PageTitle>Admin Category Panel</PageTitle>
 
 <AuthorizeView Roles="admin">
     <Authorized>
@@ -20,26 +18,26 @@
                             SuccessIcon="fa fa-thumbs-up"
                             ErrorIcon="fa fa-bug" />
 
-            <h2 class="mb-4">Mağazalar</h2>
+            <h2 class="mb-4">Kategoriler</h2>
 
-            <button class="btn btn-success mb-3" @onclick="ShowAddModal">Yeni Mağaza Ekle</button>
+            <button class="btn btn-success mb-3" @onclick="ShowAddModal">Yeni Kategori Ekle</button>
 
             <table class="table table-striped table-hover shadow-sm rounded">
                 <thead class="table-dark">
                     <tr>
-                        <th>Mağaza Adı</th>
+                        <th>Kategori Adı</th>
                         <th>Açıklama</th>
                         <th>İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in shops)
+                    @foreach (var item in categories)
                     {
                         <tr>
                             <td>@item.Name</td>
                             <td>@item.Description</td>
                             <td>
-                                <button class="btn btn-primary btn-sm me-2" @onclick="() => EditShop(item)">Düzenle</button>
+                                <button class="btn btn-primary btn-sm me-2" @onclick="() => EditCategory(item)">Düzenle</button>
                                 <button class="btn btn-danger btn-sm" @onclick="() => ShowDeleteModal(item)">Sil</button>
                             </td>
                         </tr>
@@ -49,28 +47,28 @@
         </div>
 
         <!-- Add / Edit Modal -->
-        @if (showEditModal && selectedShop != null)
+        @if (showEditModal && selectedCategory != null)
         {
             <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
                 <div class="modal-dialog">
                     <div class="modal-content shadow-lg">
                         <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title">@((isAddMode ? "Yeni Mağaza Ekle" : "Mağaza Düzenle"))</h5>
+                            <h5 class="modal-title">@((isAddMode ? "Yeni Kategori Ekle" : "Kategori Düzenle"))</h5>
                             <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label class="form-label">Mağaza Adı</label>
-                                <input class="form-control" @bind="selectedShop.Name" />
+                                <label class="form-label">Kategori Adı</label>
+                                <input class="form-control" @bind="selectedCategory.Name" />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Açıklama</label>
-                                <textarea class="form-control" @bind="selectedShop.Description"></textarea>
+                                <textarea class="form-control" @bind="selectedCategory.Description"></textarea>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button class="btn btn-secondary" @onclick="CloseEditModal">İptal</button>
-                            <button class="btn btn-primary" @onclick="SaveEditShop">Kaydet</button>
+                            <button class="btn btn-primary" @onclick="SaveEditCategory">Kaydet</button>
                         </div>
                     </div>
                 </div>
@@ -88,12 +86,12 @@
                             <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
                         </div>
                         <div class="modal-body">
-                            <p>Seçili mağazayı silmek istediğinizden emin misiniz?</p>
-                            <strong>@selectedShop?.Name</strong>
+                            <p>Seçili kategoriyi silmek istediğinizden emin misiniz?</p>
+                            <strong>@selectedCategory?.Name</strong>
                         </div>
                         <div class="modal-footer">
                             <button class="btn btn-secondary" @onclick="CloseDeleteModal">İptal</button>
-                            <button class="btn btn-danger" @onclick="DeleteShop">Sil</button>
+                            <button class="btn btn-danger" @onclick="DeleteCategory">Sil</button>
                         </div>
                     </div>
                 </div>
@@ -106,19 +104,19 @@
 </AuthorizeView>
 
 @code {
-    List<ShopViewModal> shops = new List<ShopViewModal>();
+    List<CategoryViewModel> categories = new();
     private bool showDeleteModal = false;
     private bool showEditModal = false;
     private bool isAddMode = false;
-    private ShopViewModal? selectedShop;
+    private CategoryViewModel? selectedCategory;
 
     async Task ReadData()
     {
-        shops.Clear();
-        var response = await RequestManager.GetAsync<List<JsonElement>>(ApiSettings.GetShops);
+        categories.Clear();
+        var response = await RequestManager.GetAsync<List<JsonElement>>(ApiSettings.GetCategories);
         foreach (var item in response)
         {
-            shops.Add(new ShopViewModal
+            categories.Add(new CategoryViewModel
             {
                 Id = item.GetProperty("id").GetInt32(),
                 Name = item.GetProperty("name").GetString(),
@@ -138,18 +136,18 @@
 
     private void ShowAddModal()
     {
-        selectedShop = new ShopViewModal();
+        selectedCategory = new CategoryViewModel();
         isAddMode = true;
         showEditModal = true;
     }
 
-    private void EditShop(ShopViewModal shop)
+    private void EditCategory(CategoryViewModel category)
     {
-        selectedShop = new ShopViewModal
+        selectedCategory = new CategoryViewModel
         {
-            Id = shop.Id,
-            Name = shop.Name,
-            Description = shop.Description
+            Id = category.Id,
+            Name = category.Name,
+            Description = category.Description
         };
         isAddMode = false;
         showEditModal = true;
@@ -158,30 +156,29 @@
     private void CloseEditModal()
     {
         showEditModal = false;
-        selectedShop = null;
+        selectedCategory = null;
     }
 
-    private async Task SaveEditShop()
+    private async Task SaveEditCategory()
     {
         try
         {
-            if (selectedShop == null) return;
+            if (selectedCategory == null) return;
 
-            var payload = new { Name = selectedShop.Name, Description = selectedShop.Description };
+            var payload = new { Name = selectedCategory.Name, Description = selectedCategory.Description };
 
             if (isAddMode)
             {
-                await RequestManager.PostAsync<object, string>(ApiSettings.AddShop, payload);
+                await RequestManager.PostAsync<object, string>(ApiSettings.AddCategory, payload);
             }
             else
             {
-                ApiSettings.shopId = selectedShop.Id;
-                await RequestManager.PutAsync<object, object>(ApiSettings.UpdateShop, payload);
-                ApiSettings.shopId = 0;
+                ApiSettings.categoryId = selectedCategory.Id;
+                await RequestManager.PutAsync<object, object>(ApiSettings.UpdateCategory, payload);
+                ApiSettings.categoryId = 0;
             }
             ToastService.ShowSuccess("İşlem Başarılı");
             showEditModal = false;
-            // navigationManager.NavigateTo("/adminShops", true);
             await ReadData();
         }
         catch (Exception ex)
@@ -190,27 +187,27 @@
         }
     }
 
-    private void ShowDeleteModal(ShopViewModal shop)
+    private void ShowDeleteModal(CategoryViewModel category)
     {
-        selectedShop = shop;
+        selectedCategory = category;
         showDeleteModal = true;
     }
 
     private void CloseDeleteModal()
     {
         showDeleteModal = false;
-        selectedShop = null;
+        selectedCategory = null;
     }
 
-    private async Task DeleteShop()
+    private async Task DeleteCategory()
     {
         try
         {
-            if (selectedShop == null) return;
+            if (selectedCategory == null) return;
 
-            ApiSettings.shopId = selectedShop.Id;
-            await RequestManager.DeleteAsync(ApiSettings.DeleteShop);
-            ApiSettings.shopId = 0;
+            ApiSettings.categoryId = selectedCategory.Id;
+            await RequestManager.DeleteAsync(ApiSettings.DeleteCategory);
+            ApiSettings.categoryId = 0;
             ToastService.ShowSuccess("Silme Başarılı");
             showDeleteModal = false;
             await ReadData();

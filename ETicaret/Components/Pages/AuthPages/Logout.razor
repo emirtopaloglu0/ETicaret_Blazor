@@ -15,7 +15,7 @@
         {
             _hasLoggedOut = true; // Tekrar çalışmayı önler
             await AuthProvider.MarkUserAsLoggedOut();
-            navigationManager.NavigateTo("/");
+            navigationManager.NavigateTo("/", true);
         }
     }
 }

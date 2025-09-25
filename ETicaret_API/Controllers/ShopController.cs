@@ -44,10 +44,10 @@ namespace ETicaret_API.Controllers
             Shop shop = new Shop
             {
                 Name = postRequest.Name,
-                Description = postRequest.Desc
+                Description = postRequest.Description
             };
             await _shopRepository.AddAsync(shop);
-            return Ok();
+            return Ok("İşlem Başarılı");
         }
         [Authorize(Roles = "admin")]
         // POST api/<ShopController>
@@ -72,7 +72,7 @@ namespace ETicaret_API.Controllers
             Shop shop = new Shop
             {
                 Name = postRequest.Name,
-                Description = postRequest.Desc
+                Description = postRequest.Description
             };
             await _shopRepository.UpdateAsync(id, shop);
             return Ok();
@@ -84,11 +84,11 @@ namespace ETicaret_API.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             await _shopRepository.DeleteAsync(id);
-            return Ok();
+            return Ok("İşlem Başarılı");
         }
     }
 }
 
-public record PostRequest(string Name, string Desc);
+public record PostRequest(string Name, string Description);
 public record ShopUserRequest(int userId, int shopId);
 

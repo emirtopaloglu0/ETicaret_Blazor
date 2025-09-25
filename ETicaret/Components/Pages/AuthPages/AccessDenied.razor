@@ -3,5 +3,12 @@
 <h3>Bu sayfaya erişiminiz yok!</h3>
 
 @code {
-
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (firstRender)
+        {
+            navigationManager.NavigateTo("/");
+        }
+    }
 }

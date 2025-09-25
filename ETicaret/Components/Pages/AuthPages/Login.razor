@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @using ETicaret_UI.Auth
+@using ETicaret_UI.ViewModals
 @rendermode InteractiveServer
 @attribute [StreamRendering]
 
@@ -88,7 +89,7 @@
 
             await AuthProvider.MarkUserAsAuthenticated(response.Token);
 
-            navigationManager.NavigateTo("/");
+            navigationManager.NavigateTo("/", true);
         }
         catch
         {

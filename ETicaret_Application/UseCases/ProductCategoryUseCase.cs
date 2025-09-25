@@ -46,6 +46,7 @@ namespace ETicaret_Application.UseCases
             {
                 categoryList.Add(new GetProductCategoryDto
                 {
+                    Id = item.Id,
                     Name = item.Name,
                     Description = item.Description
                 });
