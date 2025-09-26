@@ -51,7 +51,7 @@
 
         #region Products
         public int productId { get; set; }
-        public string Products => $"{BaseUrl}products";
+        public string Products => $"{BaseUrl}Product";
         public string GetProductsByShopId => $"{BaseUrl}Product/byShop/{shopId}";
         public string AddProduct => $"{BaseUrl}Product";
         public string UpdateProduct => $"{BaseUrl}Product/{productId}";
