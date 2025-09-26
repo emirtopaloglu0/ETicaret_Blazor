@@ -101,30 +101,48 @@ public class AuthService : IAuthService
     public async Task ChangeUserRole(int id, string role, int companyId = 0, int shopId = 0)
     {
         var user = await _context.Users.FindAsync(id);
-        if (user.Role == "shopUser" && role != "shopUser")
+        if (user.Role == "shopUser")
         {
             var shopUser = await _context.ShopUsers.FirstOrDefaultAsync(x => x.UserId == user.Id);
-            _context.ShopUsers.Remove(shopUser);
+            if (role != "shopUser")
+            {
+                _context.ShopUsers.Remove(shopUser);
+            }
+            else
+            {
+                if (shopId != 0)
+                    shopUser.ShopId = shopId;
+            }
         }
-        if (user.Role == "deliverer" && role != "deliverer")
-        {
-            var deliverer = await _context.Deliverers.FirstOrDefaultAsync(x => x.UserId == user.Id);
-            _context.Deliverers.Remove(deliverer);
-        }
-        if (role == "deliverer")
-        {
-            Deliverer deliverer = new();
-            deliverer.UserId = user.Id;
-            deliverer.CompanyId = companyId;
-            _context.Deliverers.Add(deliverer);
-        }
-        if (role == "shopUser")
+        else if (user.Role != "shopUser" && role == "shopUser")
         {
             Data.Entities.ShopUser shopUser = new();
             shopUser.UserId = user.Id;
             shopUser.ShopId = shopId;
             _context.ShopUsers.Add(shopUser);
         }
+
+        if (user.Role == "deliverer")
+        {
+            var deliverer = await _context.Deliverers.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            if (role != "deliverer")
+            {
+                _context.Deliverers.Remove(deliverer);
+            }
+            else
+            {
+                if (companyId != 0)
+                    deliverer.CompanyId = companyId;
+            }
+        }
+        else if (user.Role != "deliverer" && role == "deliverer")
+        {
+            Deliverer deliverer = new();
+            deliverer.UserId = user.Id;
+            deliverer.CompanyId = companyId;
+            _context.Deliverers.Add(deliverer);
+        }
+
         user.Role = role;
         await _context.SaveChangesAsync();
     }

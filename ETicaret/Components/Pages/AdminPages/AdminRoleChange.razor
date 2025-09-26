@@ -181,6 +181,8 @@
 
             ToastService.ShowSuccess("Rol başarıyla güncellendi!");
             selectedUser.Role = newRole;
+            await Task.Delay(1500);
+            navigationManager.NavigateTo("/admin", true);
         }
         catch (Exception ex)
         {
