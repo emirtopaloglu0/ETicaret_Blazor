@@ -9,7 +9,7 @@ namespace ETicaret_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    
     public class ProductCategoryController : ControllerBase
     {
         private readonly ProductCategoryUseCase _categoryUseCase;

@@ -11,7 +11,7 @@ namespace ETicaret_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+
     public class ProductController : ControllerBase
     {
 
@@ -108,16 +108,17 @@ namespace ETicaret_API.Controllers
             };
             var response = await _productRepository.UpdateAsync(id, product, shopUserId);
             if (!response) { return BadRequest(); }
-            return Ok(response);
+            return Ok("Güncelleme Başarılı");
         }
 
         // DELETE api/<ProductController>/5
+        [Authorize(Roles = "admin,shopUser")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _productRepository.DeleteAsync(id);
             if (!response) { return BadRequest(); }
-            return Ok(response);
+            return Ok("Silme başarılı");
         }
         public record _product(int CategoryId, int ShopId, string Name, string Description,
             int Stock, decimal Price, string ImageUrl, bool isDelete = false);

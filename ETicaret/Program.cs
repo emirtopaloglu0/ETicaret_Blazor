@@ -63,6 +63,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddBlazoredToast();
+builder.Services.AddScoped<CartService>();
 
 
 var app = builder.Build();

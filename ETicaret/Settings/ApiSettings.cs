@@ -17,13 +17,16 @@
         public string ChangeRole => $"{BaseUrl}User/changeRole/{userId}";
         #endregion
 
-        #region Shop
+        #region Shop / ShopUser
         public int shopId { get; set; }
 
         public string GetShops => $"{BaseUrl}Shop";
+        public string GetShopById => $"{BaseUrl}Shop/{shopId}";
         public string UpdateShop => $"{BaseUrl}Shop/{shopId}";
         public string DeleteShop => $"{BaseUrl}Shop/{shopId}";
         public string AddShop => $"{BaseUrl}Shop";
+
+        public string GetShopByUserId => $"{BaseUrl}Shop/GetShopUserById/{userId}";
         #endregion
 
         #region ProductCategory
@@ -46,7 +49,15 @@
         public string DeleteCompany => $"{BaseUrl}DeliveryCompanies/{companyId}";
         #endregion
 
+        #region Products
+        public int productId { get; set; }
         public string Products => $"{BaseUrl}products";
+        public string GetProductsByShopId => $"{BaseUrl}Product/byShop/{shopId}";
+        public string AddProduct => $"{BaseUrl}Product";
+        public string UpdateProduct => $"{BaseUrl}Product/{productId}";
+        public string DeleteProduct => $"{BaseUrl}Product/{productId}";
+
+        #endregion
 
     }
 }

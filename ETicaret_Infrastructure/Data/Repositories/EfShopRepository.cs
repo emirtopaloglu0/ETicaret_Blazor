@@ -3,6 +3,7 @@ using ETicaret_Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -86,6 +87,19 @@ namespace ETicaret_Infrastructure.Data.Repositories
             oldShop.Name = shop.Name;
             oldShop.Description = shop.Description;
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<ShopUser> GetShopUser(int shopUserId)
+        {
+            var shopUser = await _context.ShopUsers.FirstOrDefaultAsync(x => x.UserId == shopUserId);
+            ShopUser entityShopUser = new ShopUser
+            {
+                Id = shopUser.Id,
+                UserId = shopUser.UserId,
+                ShopId = shopUser.ShopId,
+            };
+
+            return entityShopUser;
         }
     }
 }

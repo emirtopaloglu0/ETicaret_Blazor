@@ -1,0 +1,332 @@
+﻿@page "/shop"
+@page "/shop/{id}"
+@using ETicaret_UI.Services
+@using ETicaret_UI.ViewModals
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Mağaza</PageTitle>
+<div class="container my-4">
+    <BlazoredToasts Position="ToastPosition.BottomRight"
+                    Timeout="10"
+                    ShowCloseButton="@true"
+                    MaxToastCount="3"
+                    IconType="IconType.FontAwesome"
+                    SuccessClass="success-toast-override"
+                    SuccessIcon="fa fa-thumbs-up"
+                    ErrorIcon="fa fa-bug" />
+
+
+    <h2 class="mb-4 text-center fw-bold">🛒 @shop.Name Mağazasının Ürünleri</h2>
+    <h4 class="mb-4 text-center text-muted">🛒 @shop.Description </h4>
+    @if (canManageProducts)
+    {
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold">Ürün Listesi</h5>
+            <button class="btn btn-success btn-sm" @onclick="OpenAddModal">
+                <i class="bi bi-plus-circle"></i> Yeni Ürün
+            </button>
+        </div>
+    }
+
+
+    @if (products?.Any() == true)
+    {
+        <div class="row g-4">
+            @foreach (var item in pagedProducts)
+            {
+                <div class="col-md-3 col-sm-6">
+                    <div class="card h-100 shadow-sm product-card">
+                        <img src="@(!string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : "https://via.placeholder.com/300x200?text=Ürün")"
+                             class="card-img-top" alt="@item.Name" style="height:200px; object-fit:cover;" />
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">@item.Name</h5>
+                            <p class="card-text text-muted small">@item.Description</p>
+                            <p class="fw-bold text-success mt-auto">@item.Price.ToString("C")</p>
+                            <p class="text-secondary small">Stok: @item.Stock</p>
+
+                            <button class="btn btn-sm btn-primary mb-2" @onclick="() => AddToCart(item)">
+                                <i class="bi bi-cart-plus"></i> Sepete Ekle
+                            </button>
+
+                            @if (canManageProducts)
+                            {
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-warning" @onclick="() => OpenEditModal(item)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => OpenDeleteModal(item)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    }
+    else
+    {
+        <div class="alert alert-info">Henüz ürün eklenmemiş.</div>
+    }
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-4">
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">Önceki</button>
+            </li>
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                int pageSize = i;
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(pageSize)">@i</button>
+                </li>
+            }
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">Sonraki</button>
+            </li>
+        </ul>
+    </nav>
+
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade @(showModal ? "show d-block" : "")" tabindex="-1" style="background: rgba(0,0,0,.5);">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@modalTitle</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (modalMode == "delete")
+                {
+                    <p><strong>@selectedProduct?.Name</strong> adlı ürünü silmek istediğinizden emin misiniz?</p>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Ürün Adı</label>
+                            <input class="form-control" @bind="productForm.Name" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Kategori</label>
+                            <select class="form-select" @bind="productForm.CategoryId">
+                                <option value=0>--Boş--</option>
+                                @foreach (var category in categories)
+                                {
+                                    <option value=@category.Id>@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Açıklama</label>
+                            <textarea class="form-control" @bind="productForm.Description"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Stok</label>
+                            <input type="number" class="form-control" @bind="productForm.Stock" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fiyat</label>
+                            <input type="number" step="0.01" class="form-control" @bind="productForm.Price" />
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Resim URL</label>
+                            <input class="form-control" @bind="productForm.ImageUrl" />
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseModal">Kapat</button>
+                @if (modalMode == "add")
+                {
+                    <button class="btn btn-success" @onclick="SaveProduct">Kaydet</button>
+                }
+                else if (modalMode == "edit")
+                {
+                    <button class="btn btn-warning" @onclick="UpdateProduct">Güncelle</button>
+                }
+                else if (modalMode == "delete")
+                {
+                    <button class="btn btn-danger" @onclick="DeleteProduct">Sil</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string id { get; set; }
+
+    List<ProductViewModel> products = new();
+    bool canManageProducts = false;
+
+    [Inject] CartService CartService { get; set; }
+
+    // Modal kontrolü
+    bool showModal = false;
+    string modalMode = "";
+    string modalTitle = "";
+    ProductViewModel? selectedProduct;
+    ProductViewModel productForm = new();
+    ShopUserViewModal? shopUser = new();
+    LoggedUserViewModel? user = new();
+    List<CategoryViewModel> categories = new();
+    ShopViewModal shop = new();
+
+    int currentPage = 1;
+    int pageSize = 8; // sayfa başına ürün
+    int totalPages => (int)Math.Ceiling((decimal)(products?.Count ?? 0) / pageSize);
+
+    IEnumerable<ProductViewModel> pagedProducts =>
+        products.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
+            if (user != null)
+            {
+                ApiSettings.userId = user.Id.ToString();
+
+                shopUser = await RequestManager.GetAsync<ShopUserViewModal>(ApiSettings.GetShopByUserId);
+                ApiSettings.userId = "";
+
+                if (shopUser.ShopId == Convert.ToInt32(id) && shopUser.UserId == user.Id)
+                {
+                    canManageProducts = true;
+                }
+                else
+                {
+                    canManageProducts = false;
+                }
+            }
+
+            ApiSettings.shopId = Convert.ToInt32(id);
+            shop = await RequestManager.GetAsync<ShopViewModal>(ApiSettings.GetShopById);
+            products = await RequestManager.GetAsync<List<ProductViewModel>>(ApiSettings.GetProductsByShopId);
+            ApiSettings.shopId = 0;
+            categories = await RequestManager.GetAsync<List<CategoryViewModel>>(ApiSettings.GetCategories);
+
+            StateHasChanged();
+        }
+    }
+
+    void OpenAddModal()
+    {
+        modalMode = "add";
+        modalTitle = "Yeni Ürün Ekle";
+        productForm = new ProductViewModel();
+        showModal = true;
+    }
+
+    void OpenEditModal(ProductViewModel product)
+    {
+        modalMode = "edit";
+        modalTitle = "Ürün Güncelle";
+        selectedProduct = product;
+        productForm = new ProductViewModel
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            CategoryId = product.CategoryId,
+            CategoryName = product.CategoryName,
+            Stock = product.Stock,
+            Price = product.Price,
+            ImageUrl = product.ImageUrl
+        };
+        showModal = true;
+    }
+
+    void OpenDeleteModal(ProductViewModel product)
+    {
+        modalMode = "delete";
+        modalTitle = "Ürün Sil";
+        selectedProduct = product;
+        showModal = true;
+    }
+
+    async Task CloseModal()
+    {
+        showModal = false;
+        modalMode = "";
+        modalTitle = "";
+        ApiSettings.shopId = shopUser.ShopId;
+        products = await RequestManager.GetAsync<List<ProductViewModel>>(ApiSettings.GetProductsByShopId);
+        StateHasChanged();
+    }
+
+    async Task SaveProduct()
+    {
+        var payload = new
+        {
+            CategoryId = productForm.CategoryId,
+            ShopId = id,
+            Name = productForm.Name,
+            Description = productForm.Description,
+            Stock = productForm.Stock,
+            Price = productForm.Price,
+            ImageUrl = ""
+        };
+        var response = await RequestManager.PostAsync<object, string>(ApiSettings.AddProduct, payload);
+        if (response != null)
+        {
+            ToastService.ShowSuccess("Ürün eklendi");
+        }
+        await CloseModal();
+    }
+
+    async Task UpdateProduct()
+    {
+        var payload = new
+        {
+            CategoryId = productForm.CategoryId,
+            ShopId = id,
+            Name = productForm.Name,
+            Description = productForm.Description,
+            Stock = productForm.Stock,
+            Price = productForm.Price,
+            ImageUrl = ""
+        };
+        ApiSettings.productId = productForm.Id;
+        await RequestManager.PutAsync<object, string>(ApiSettings.UpdateProduct, payload);
+        ApiSettings.productId = 0;
+
+        ToastService.ShowSuccess("Ürün güncellendi");
+
+        await CloseModal();
+    }
+
+    async Task DeleteProduct()
+    {
+        ApiSettings.productId = selectedProduct.Id;
+        await RequestManager.DeleteAsync(ApiSettings.DeleteProduct);
+        ApiSettings.productId = 0;
+
+        ToastService.ShowSuccess("Ürün silindi");
+
+        await CloseModal();
+    }
+    void ChangePage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+        }
+    }
+
+    void AddToCart(ProductViewModel product)
+    {
+        CartService.AddToCart(product);
+        ToastService.ShowSuccess($"{product.Name} sepete eklendi!");
+    }
+}

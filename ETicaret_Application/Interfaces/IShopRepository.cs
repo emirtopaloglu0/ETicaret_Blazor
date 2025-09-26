@@ -15,5 +15,6 @@ namespace ETicaret_Application.Interfaces
         Task<Shop> GetByIdShop(int id);
         Task UpdateAsync(int id, Shop shop);
         Task DeleteAsync(int id);
+        Task<ShopUser> GetShopUser(int shopUserId);
     }
 }

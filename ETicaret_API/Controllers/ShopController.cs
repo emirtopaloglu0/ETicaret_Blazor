@@ -10,7 +10,7 @@ namespace ETicaret_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+
     public class ShopController : ControllerBase
     {
         private readonly IShopRepository _shopRepository;
@@ -86,6 +86,21 @@ namespace ETicaret_API.Controllers
             await _shopRepository.DeleteAsync(id);
             return Ok("İşlem Başarılı");
         }
+
+        [Authorize(Roles = "admin,shopUser")]
+        [HttpGet("GetShopUserById/{userId}")]
+        public async Task<ActionResult<ShopUser>> GetShopUser(int userId)
+        {
+            var response = await _shopRepository.GetShopUser(userId);
+            ShopUser shopUser = new ShopUser
+            {
+                Id = response.Id,
+                UserId = response.UserId,
+                ShopId = response.ShopId
+            };
+            return shopUser;
+        }
+
     }
 }
 
