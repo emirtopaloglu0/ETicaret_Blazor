@@ -25,9 +25,7 @@
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/">Hesabım</a>
                 </li>
-                <li class="nav-item">
-                    <ETicaret_UI.Components.Pages.Cart />
-                </li>
+
                 <AuthorizeView Roles="admin">
                     <Authorized>
                         <li class="nav-item">
@@ -35,6 +33,10 @@
                         </li>
                     </Authorized>
                 </AuthorizeView>
+
+                <li class="nav-item">
+                    <ETicaret_UI.Components.Pages.Cart />
+                </li>
             </ul>
 
             <!-- Sağ tarafta Login/Logout -->

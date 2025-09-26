@@ -105,7 +105,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
         public async Task<List<ProductDTO>?> GetByCategoryIdAsync(int categoryId)
         {
             var productsByCategory = await _context.Products
-                .Where(x => x.CategoryId == categoryId)
+                .Where(x => x.CategoryId == categoryId && !x.IsDelete)
                 .Include(x => x.Category)
                 .Include(x => x.Shop)
                 .ToListAsync();
@@ -134,7 +134,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
         public async Task<List<ProductDTO>?> GetByShopIdAsync(int shopId)
         {
             var productsByCategory = await _context.Products
-                .Where(x => x.ShopId == shopId)
+                .Where(x => x.ShopId == shopId && !x.IsDelete)
                 .Include(x => x.Category)
                 .Include(x => x.Shop)
                 .ToListAsync();
