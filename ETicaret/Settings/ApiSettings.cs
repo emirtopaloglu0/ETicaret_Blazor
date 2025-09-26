@@ -13,6 +13,8 @@
         public string Register => $"{BaseUrl}Auth/register";
         public string GetCurrentUser => $"{BaseUrl}User/me";
         public string CheckByMail => $"{BaseUrl}User/CheckByMail/{mail}";
+        public string GetByMail => $"{BaseUrl}User/GetByMail/{mail}";
+        public string ChangeRole => $"{BaseUrl}User/changeRole/{userId}";
         #endregion
 
         #region Shop
@@ -35,7 +37,7 @@
 
         #endregion
 
-        #region
+        #region DeliveryCompanies
         public int companyId { get; set; }
 
         public string GetCompanies => $"{BaseUrl}DeliveryCompanies";

@@ -1,4 +1,6 @@
-﻿using ETicaret_Application.Interfaces;
+﻿using ETicaret_Application.DTOs.ProductDTOs;
+using ETicaret_Application.DTOs.UserDTOs;
+using ETicaret_Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +55,14 @@ namespace ETicaret_API.Controllers
             return response;
         }
 
+        [HttpGet("GetByMail/{mail}")]
+        public async Task<ActionResult<IEnumerable<LoggedUserDto>>> GetUserByMail(string mail)
+        {
+            var response = await _authService.GetByMail(mail);
+            if (response is null) { return NotFound("Bulunamadı"); }
+            return Ok(response);
+        }
+
         [HttpPut("me")]
         public async Task<IActionResult> UpdateCurrentUser(UpdateUserRequest request)
         {
@@ -65,12 +75,13 @@ namespace ETicaret_API.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpPut("changeRole/{id}")]
-        public async Task<IActionResult> ChangeRole(int id, string role)
+        public async Task<IActionResult> ChangeRole(int id, [FromBody] ChangeRole changeRole)
         {
-            await _authService.ChangeUserRole(id, role);
+            await _authService.ChangeUserRole(id, changeRole.role, changeRole.companyId, changeRole.shopId);
             return Ok();
         }
     }
     public record UpdateUserRequest(string Email, string FirstName, string LastName, string Password);
+    public record ChangeRole(string role, int companyId = 0, int shopId = 0);
 
 }

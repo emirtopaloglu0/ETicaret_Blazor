@@ -98,9 +98,33 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task ChangeUserRole(int id, string role)
+    public async Task ChangeUserRole(int id, string role, int companyId = 0, int shopId = 0)
     {
         var user = await _context.Users.FindAsync(id);
+        if (user.Role == "shopUser" && role != "shopUser")
+        {
+            var shopUser = await _context.ShopUsers.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            _context.ShopUsers.Remove(shopUser);
+        }
+        if (user.Role == "deliverer" && role != "deliverer")
+        {
+            var deliverer = await _context.Deliverers.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            _context.Deliverers.Remove(deliverer);
+        }
+        if (role == "deliverer")
+        {
+            Deliverer deliverer = new();
+            deliverer.UserId = user.Id;
+            deliverer.CompanyId = companyId;
+            _context.Deliverers.Add(deliverer);
+        }
+        if (role == "shopUser")
+        {
+            Data.Entities.ShopUser shopUser = new();
+            shopUser.UserId = user.Id;
+            shopUser.ShopId = shopId;
+            _context.ShopUsers.Add(shopUser);
+        }
         user.Role = role;
         await _context.SaveChangesAsync();
     }
@@ -108,6 +132,25 @@ public class AuthService : IAuthService
     public async Task<bool> CheckByMail(string mail)
     {
         return await _context.Users.AnyAsync(x => x.Email == mail);
-
+    }
+    public async Task<LoggedUserDto> GetByMail(string mail)
+    {
+        try
+        {
+            var response = await _context.Users.FirstOrDefaultAsync(x => x.Email == mail);
+            LoggedUserDto loggedUser = new LoggedUserDto
+            {
+                Id = response.Id,
+                FirstName = response.FirstName,
+                LastName = response.LastName,
+                Email = response.Email,
+                Role = response.Role,
+            };
+            return loggedUser;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
