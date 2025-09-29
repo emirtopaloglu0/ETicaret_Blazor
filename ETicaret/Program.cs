@@ -75,6 +75,49 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+app.MapPost("/upload", async (HttpRequest request, IWebHostEnvironment env) =>
+{
+    var form = await request.ReadFormAsync();
+    var file = form.Files.FirstOrDefault();
+    if (file == null || file.Length == 0)
+    {
+        return Results.BadRequest("Dosya seçilmedi");
+    }
+
+    var uploads = Path.Combine(env.WebRootPath, "uploads");
+    if (!Directory.Exists(uploads))
+    {
+        Directory.CreateDirectory(uploads);
+    }
+
+    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+    var filePath = Path.Combine(uploads, fileName);
+
+    using (var stream = new FileStream(filePath, FileMode.Create))
+    {
+        await file.CopyToAsync(stream);
+    }
+
+    var url = $"/uploads/{fileName}";
+    return Results.Ok(url);
+});
+
+app.MapGet("/uploads/list", () =>
+{
+    var uploadsPath = Path.Combine(app.Environment.WebRootPath, "uploads");
+    if (!Directory.Exists(uploadsPath))
+        return new List<string>();
+
+    var files = Directory.GetFiles(uploadsPath)
+                         .Select(f => "/uploads/" + Path.GetFileName(f))
+                         .ToList();
+
+    return files;
+});
+
+
+
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();

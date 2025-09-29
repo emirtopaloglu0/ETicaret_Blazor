@@ -38,7 +38,7 @@
                 <div class="col-md-3 col-sm-6">
                     <div class="card h-100 shadow-sm product-card">
                         <img src="@(!string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : "https://via.placeholder.com/300x200?text=Ürün")"
-                             class="card-img-top" alt="@item.Name" style="height:200px; object-fit:cover;" />
+                             class="card-img-top" alt="@item.Name" style="height:250px; object-fit:cover;" />
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title fw-bold">@item.Name</h5>
                             <p class="card-text text-muted small">@item.Description</p>
@@ -135,10 +135,35 @@
                             <label class="form-label">Fiyat</label>
                             <input type="number" step="0.01" class="form-control" @bind="productForm.Price" />
                         </div>
+
                         <div class="col-md-12">
-                            <label class="form-label">Resim URL</label>
-                            <input class="form-control" @bind="productForm.ImageUrl" />
+                            <label class="form-label">Ürün Resmi</label>
+
+                            <!-- Dosya yükleme -->
+                            <InputFile OnChange="HandleFileSelected" />
+                            @*<small class="text-muted">Yeni bir dosya seçersen uploads'a kaydedilir.</small>*@
+                            <hr />
+
+                            <!-- Var olan dosyalardan seç -->
+                            <select class="form-select mt-2" @bind="productForm.ImageUrl">
+                                <option value="">-- Mevcut dosyalardan seç --</option>
+                                @foreach (var file in availableImages)
+                                {
+                                    <option value="@file">@file</option>
+                                }
+                            </select>
+
+                            @if (!string.IsNullOrEmpty(productForm.ImageUrl))
+                            {
+                                <div class="mt-3">
+                                    <img src="@productForm.ImageUrl" alt="Ürün resmi"
+                                         class="img-thumbnail shadow-sm" style="max-height:150px;" />
+                                </div>
+                            }
                         </div>
+
+
+
                     </div>
                 }
             </div>
@@ -165,6 +190,7 @@
     [Parameter] public string id { get; set; }
 
     List<ProductViewModel> products = new();
+    List<string> availableImages = new();
     bool canManageProducts = false;
 
     [Inject] CartService CartService { get; set; }
@@ -200,7 +226,7 @@
                 shopUser = await RequestManager.GetAsync<ShopUserViewModal>(ApiSettings.GetShopByUserId);
                 ApiSettings.userId = "";
 
-                if (shopUser.ShopId == Convert.ToInt32(id) && shopUser.UserId == user.Id)
+                if (shopUser != null && (shopUser.ShopId == Convert.ToInt32(id) && shopUser.UserId == user.Id))
                 {
                     canManageProducts = true;
                 }
@@ -215,6 +241,9 @@
             products = await RequestManager.GetAsync<List<ProductViewModel>>(ApiSettings.GetProductsByShopId);
             ApiSettings.shopId = 0;
             categories = await RequestManager.GetAsync<List<CategoryViewModel>>(ApiSettings.GetCategories);
+
+            var http = new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
+            availableImages = await http.GetFromJsonAsync<List<string>>("uploads/list") ?? new();
 
             StateHasChanged();
         }
@@ -275,7 +304,7 @@
             Description = productForm.Description,
             Stock = productForm.Stock,
             Price = productForm.Price,
-            ImageUrl = ""
+            ImageUrl = string.IsNullOrEmpty(productForm.ImageUrl) ? string.Empty : productForm.ImageUrl
         };
         var response = await RequestManager.PostAsync<object, string>(ApiSettings.AddProduct, payload);
         if (response != null)
@@ -295,7 +324,7 @@
             Description = productForm.Description,
             Stock = productForm.Stock,
             Price = productForm.Price,
-            ImageUrl = ""
+            ImageUrl = string.IsNullOrEmpty(productForm.ImageUrl) ? string.Empty : productForm.ImageUrl
         };
         ApiSettings.productId = productForm.Id;
         await RequestManager.PutAsync<object, string>(ApiSettings.UpdateProduct, payload);
@@ -329,4 +358,25 @@
         CartService.AddToCart(product);
         ToastService.ShowSuccess($"{product.Name} sepete eklendi!");
     }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(file.OpenReadStream(10_000_000)), "file", file.Name);
+
+            var http = new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
+            var response = await http.PostAsync("upload", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var url = await response.Content.ReadAsStringAsync();
+                productForm.ImageUrl = url.Trim('"'); // örn: /uploads/xyz.jpg
+            }
+        }
+    }
+
+
 }
