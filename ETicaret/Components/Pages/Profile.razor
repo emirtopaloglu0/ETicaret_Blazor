@@ -1,0 +1,142 @@
+﻿@page "/profile"
+@using ETicaret_UI.ViewModals
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Profilim</PageTitle>
+<BlazoredToasts Position="ToastPosition.BottomRight"
+                Timeout="10"
+                ShowCloseButton="@true"
+                MaxToastCount="3"
+                IconType="IconType.FontAwesome"
+                SuccessClass="success-toast-override"
+                SuccessIcon="fa fa-thumbs-up"
+                ErrorIcon="fa fa-bug" />
+
+<AuthorizeView>
+    <Authorized>
+        @if (user != null)
+        {
+            <div class="container my-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card shadow-lg rounded-4 border-0">
+                            <div class="card-header bg-primary text-white d-flex align-items-center">
+                                <i class="bi bi-person-circle fs-4 me-2"></i>
+                                <h5 class="mb-0">Profil Bilgilerim</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Ad</label>
+                                    <input class="form-control" @bind="user.FirstName" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Soyad</label>
+                                    <input class="form-control" @bind="user.LastName" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Email</label>
+                                    <input class="form-control" @bind="user.Email" type="email" disabled />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Eski Şifre</label>
+                                    <input class="form-control" @bind="oldPassword" type="password" placeholder="Eski şifrenizi girin" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Yeni Şifre</label>
+                                    <input class="form-control" @bind="newPassword" type="password" placeholder="Yeni şifre girin" />
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white d-flex justify-content-end">
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#updateModal">
+                                    <i class="bi bi-check-circle"></i> Güncelle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onay Modali -->
+            <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4">
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title text-dark" id="updateModalLabel">
+                                <i class="bi bi-exclamation-triangle"></i> Emin misiniz?
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                        </div>
+                        <div class="modal-body">
+                            Profil bilgilerinizi güncellemek istediğinizden emin misiniz?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                            <button type="button" class="btn btn-success" @onclick="ConfirmUpdate" data-bs-dismiss="modal">Evet, Güncelle</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center my-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <ETicaret_UI.Components.Pages.AuthPages.AccessDenied />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    LoggedUserViewModel user = new();
+    string newPassword = string.Empty;
+    string oldPassword = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
+            StateHasChanged();
+        }
+    }
+
+    async Task ConfirmUpdate()
+    {
+        try
+        {
+            ApiSettings.userId = user.Id.ToString();
+            ApiSettings.password = oldPassword;
+            var response = await RequestManager.GetAsync<bool>(ApiSettings.IsPasswordRight);
+
+            if (!response)
+            {
+                ToastService.ShowError("Bir hata oluştu, lütfen tekrar deneyin.");
+                return;
+            }
+
+            var payload = new
+            {
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Password = newPassword
+            };
+
+            await RequestManager.PutAsync<object, object>(ApiSettings.UpdateUser, payload);
+
+            ToastService.ShowSuccess("Profiliniz başarıyla güncellendi!");
+            await Task.Delay(1700);
+            navigationManager.NavigateTo("/");
+        }
+        catch
+        {
+            ToastService.ShowError("Bir hata oluştu, lütfen tekrar deneyin.");
+        }
+    }
+}

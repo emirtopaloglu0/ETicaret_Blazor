@@ -8,6 +8,7 @@
 
         #region User - Auth
         public string mail { get; set; }
+        public string password { get; set; }
 
         public string Login => $"{BaseUrl}Auth/login";
         public string Register => $"{BaseUrl}Auth/register";
@@ -15,6 +16,8 @@
         public string CheckByMail => $"{BaseUrl}User/CheckByMail/{mail}";
         public string GetByMail => $"{BaseUrl}User/GetByMail/{mail}";
         public string ChangeRole => $"{BaseUrl}User/changeRole/{userId}";
+        public string UpdateUser => $"{BaseUrl}User/me";
+        public string IsPasswordRight => $"{BaseUrl}User/IsPasswordRight/{password}/{userId}";
         #endregion
 
         #region Shop / ShopUser

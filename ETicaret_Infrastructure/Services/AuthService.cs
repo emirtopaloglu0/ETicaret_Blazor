@@ -151,6 +151,15 @@ public class AuthService : IAuthService
     {
         return await _context.Users.AnyAsync(x => x.Email == mail);
     }
+
+    public async Task<bool> IsPasswordRight(string password, int userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
+            return false;
+        return true;
+    }
+
     public async Task<LoggedUserDto> GetByMail(string mail)
     {
         try

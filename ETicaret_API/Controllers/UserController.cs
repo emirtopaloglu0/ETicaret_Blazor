@@ -55,6 +55,14 @@ namespace ETicaret_API.Controllers
             return response;
         }
 
+        [Authorize]
+        [HttpGet("IsPasswordRight/{password}/{userId}")]
+        public async Task<bool> IsUserPasswordRight(string password, int userId)
+        {
+            var response = await _authService.IsPasswordRight(password, userId);
+            return response;
+        }
+
         [HttpGet("GetByMail/{mail}")]
         public async Task<ActionResult<IEnumerable<LoggedUserDto>>> GetUserByMail(string mail)
         {
@@ -64,13 +72,13 @@ namespace ETicaret_API.Controllers
         }
 
         [HttpPut("me")]
-        public async Task<IActionResult> UpdateCurrentUser(UpdateUserRequest request)
+        public async Task<IActionResult> UpdateCurrentUser([FromBody] UpdateUserRequest request)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var user = await _authService.UpdateUserAsync
                 (userId, request.Email, request.FirstName, request.LastName, request.Password);
 
-            return NoContent();
+            return Ok();
         }
 
         [Authorize(Roles = "admin")]
