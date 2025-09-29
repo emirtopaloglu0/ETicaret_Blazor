@@ -1,0 +1,192 @@
+﻿@page "/payment"
+@using ETicaret_UI.Services
+@using ETicaret_UI.ViewModals
+@inject CartService CartService
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Sepet</PageTitle>
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Sepet Ürünleri -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-primary text-white fw-bold">
+                    <i class="bi bi-cart-check"></i> Sepetim
+                </div>
+                <div class="card-body">
+                    @if (cartItems != null && cartItems.Any())
+                    {
+                        @foreach (var it in cartItems)
+                        {
+                            <div class="d-flex align-items-center justify-content-between border-bottom py-2">
+                                <div class="d-flex align-items-center">
+                                    <img src="@(!string.IsNullOrEmpty(it.Product.ImageUrl) ? it.Product.ImageUrl : "https://via.placeholder.com/64")"
+                                         style="width:60px;height:60px;object-fit:cover;border-radius:8px" />
+                                    <div class="ms-3">
+                                        <div class="fw-bold">@it.Product.Name</div>
+                                        <div class="small text-muted">@it.Product.Price.ToString("C") x @it.Quantity</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <button class="btn btn-sm btn-outline-success mb-1"
+                                            @onclick="() => UpdateQuantity(it.Product.Id, it.Quantity + 1)">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            @onclick="() => UpdateQuantity(it.Product.Id, it.Quantity - 1)">
+                                        <i class="bi bi-dash-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">Sepetiniz boş.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Kargo ve Adres -->
+            <div class="card shadow-sm border-0 rounded-3 mt-4">
+                <div class="card-header bg-light fw-bold">
+                    <i class="bi bi-truck"></i> Teslimat Bilgileri
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Kargo Firması</label>
+                        <select class="form-select" @bind="companyId">
+                            <option value="">--Firma Seçin--</option>
+                            @foreach (var company in deliveryCompanies)
+                            {
+                                <option value=@company.Id>@company.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Adres</label>
+                        <textarea class="form-control" rows="3" placeholder="Teslimat adresinizi yazın..."
+                                  @bind="@address"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sipariş Özeti -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-secondary text-white fw-bold">
+                    <i class="bi bi-receipt"></i> Sipariş Özeti
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Ürün Sayısı</span>
+                        <span>@cartItems?.Sum(x => x.Quantity) adet</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Ara Toplam</span>
+                        <span>@CartService.TotalAmount.ToString("C")</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Genel Toplam</span>
+                        <span>@CartService.TotalAmount.ToString("C")</span>
+                    </div>
+
+                    <AuthorizeView Roles="customer">
+                        <Authorized>
+                            <button @onclick="() => CompeleteOrder()"
+                                    class="btn btn-primary w-100 mt-3">
+                                <i class="bi bi-check-circle"></i> Siparişi Tamamla
+                            </button>
+                        </Authorized>
+                        <NotAuthorized>
+                            <div class="alert alert-warning mt-3">
+                                Sipariş verebilmek için müşteri girişi yapmalısınız.
+                            </div>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    <button @onclick="() => CartService.Clear()" class="btn btn-danger w-100 mt-3">
+                        <i class="bi bi-trash"></i> Sepeti Temizle
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    IReadOnlyList<CartService.CartItem> cartItems;
+    List<DeliveryCompanyViewModel> deliveryCompanies = new();
+
+    int companyId = 0;
+    string address = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        cartItems = CartService.Items;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var response = await RequestManager.GetAsync<List<DeliveryCompanyViewModel>>(ApiSettings.GetCompanies);
+            if (response != null)
+            {
+                deliveryCompanies = response;
+                StateHasChanged();
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
+    }
+
+    void UpdateQuantity(int productId, int quantity)
+    {
+        CartService.UpdateQuantity(productId, quantity);
+    }
+
+    async Task CompeleteOrder()
+    {
+        try
+        {
+            List<CreateOrderItemViewModal> orderItems = new();
+            cartItems = CartService.Items;
+            foreach (var item in cartItems)
+            {
+                orderItems.Add(new CreateOrderItemViewModal
+                {
+                    ProductId = item.Product.Id,
+                    Quantity = item.Quantity
+                });
+            }
+            var payload = new
+            {
+                ShippingAddress = address,
+                DelivererCompanyId = companyId,
+                Items = orderItems
+            };
+
+            await RequestManager.PostAsync<object, object>(ApiSettings.CompleteOrder, payload);
+
+            ToastService.ShowSuccess("Sipariş Başarıyla Oluşturuldu");
+            CartService.Clear();
+            await Task.Delay(1500);
+            navigationManager.NavigateTo("/");
+        }
+        catch
+        {
+            ToastService.ShowError("Beklenmeyen Bir Hata Oluştu");
+        }
+    }
+}

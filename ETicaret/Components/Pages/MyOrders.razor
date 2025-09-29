@@ -1,0 +1,28 @@
+﻿@page "/myOrders"
+@using ETicaret_UI.ViewModals
+
+<div class="container">
+    @if (orders != null && orders.Any())
+    {
+        @foreach (var order in orders)
+        {
+            @order.OrderDate
+            <br />
+            @order.Status
+        }
+    }
+</div>
+
+
+@code {
+    List<OrderViewModel>? orders = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            orders = await RequestManager.GetAsync<List<OrderViewModel>>(ApiSettings.GetOrdersByUser);
+            StateHasChanged();
+        }
+    }
+}

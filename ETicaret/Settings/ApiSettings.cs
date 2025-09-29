@@ -59,5 +59,10 @@
 
         #endregion
 
+        #region Orders
+        public string CompleteOrder => $"{BaseUrl}Orders";
+        public string GetOrdersByUser => $"{BaseUrl}Orders/byUser";
+        #endregion
+
     }
 }

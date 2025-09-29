@@ -6,7 +6,6 @@
 
 <PageTitle>Ana Sayfa</PageTitle>
 
-
 <div class="container my-4">
     <BlazoredToasts Position="ToastPosition.BottomRight"
                     Timeout="10"
@@ -17,28 +16,59 @@
                     SuccessIcon="fa fa-thumbs-up"
                     ErrorIcon="fa fa-bug" />
 
+    <!-- Filtreleme ve Arama -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-3 col-sm-12 mb-2">
+            <select class="form-select" @bind="selectedCategory">
+                <option value="">Tüm Kategoriler</option>
+                @foreach (var cat in categories)
+                {
+                    <option value="@cat">@cat</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-6 col-sm-12 mb-2">
+            <input type="text" class="form-control" placeholder="Ürün ara..."
+                   @bind="searchQuery" @bind:event="oninput" />
+        </div>
+        <div class="col-md-3 col-sm-12 mb-2 text-end">
+            <span class="badge bg-primary fs-6">
+                <i class="bi bi-box-seam"></i> Toplam: @filteredProducts.Count()
+            </span>
+        </div>
+    </div>
+
+    <!-- Ürün Listesi -->
     <div class="row g-4">
         @foreach (var item in pagedProducts)
         {
             <div class="col-md-3 col-sm-6">
-                <div class="card h-100 shadow-sm product-card">
+                <div class="card h-100 shadow-sm product-card border-0 rounded-3">
                     <img src="@(!string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : "https://via.placeholder.com/300x200?text=Ürün")"
-                         class="card-img-top" alt="@item.Name" style="height:200px; object-fit:cover;" />
+                         class="card-img-top rounded-top" alt="@item.Name"
+                         style="height:200px; object-fit:cover;" />
                     <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-bold">@item.Name</h5>
-                        <p class="card-text text-muted small">@item.Description</p>
-                        <p class="fw-bold text-success mt-auto">@item.Price.ToString("C")</p>
-                        <p class="text-secondary small">Stok: @item.Stock</p>
-                        <p class="text-secondary small">Mağaza: @item.ShopName</p>
+                        <h6 class="card-title fw-bold">@item.Name</h6>
+                        <p class="card-text text-muted small flex-grow-1">@item.Description</p>
 
-                        <button class="btn btn-sm btn-primary mb-2" @onclick="() => AddToCart(item)">
-                            <i class="bi bi-cart-plus"></i> Sepete Ekle
-                        </button>
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <span class="fw-bold text-success">@item.Price.ToString("C")</span>
+                            <button class="btn btn-sm btn-outline-primary"
+                                    @onclick="() => AddToCart(item)">
+                                <i class="bi bi-cart-plus"></i>
+                            </button>
+                        </div>
+
+                        <a class="text-secondary small mt-2 text-decoration-none" href="shop/@item.ShopId">
+                            <i class="bi bi-shop"></i> @item.ShopName
+                        </a>
                     </div>
                 </div>
             </div>
         }
     </div>
+
+    <!-- Sayfalama -->
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center mt-4">
             <li class="page-item @(currentPage == 1 ? "disabled" : "")">
@@ -59,25 +89,37 @@
 </div>
 
 @code {
-
     List<ProductViewModel> products = new();
+    List<string> categories = new();
+    string selectedCategory = "";
+    string searchQuery = "";
+
     [Inject] CartService CartService { get; set; }
 
     int currentPage = 1;
-    int pageSize = 8; // sayfa başına ürün
-    int totalPages => (int)Math.Ceiling((decimal)(products?.Count ?? 0) / pageSize);
+    int pageSize = 8;
+    int totalPages => (int)Math.Ceiling((decimal)(filteredProducts.Count()) / pageSize);
+
+    IEnumerable<ProductViewModel> filteredProducts =>
+        products
+        .Where(p => string.IsNullOrEmpty(selectedCategory) || p.CategoryName == selectedCategory)
+        .Where(p => string.IsNullOrEmpty(searchQuery) ||
+                    p.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    p.Description.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
 
     IEnumerable<ProductViewModel> pagedProducts =>
-        products.Skip((currentPage - 1) * pageSize).Take(pageSize);
+        filteredProducts.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             products = await RequestManager.GetAsync<List<ProductViewModel>>(ApiSettings.Products);
+            categories = products.Select(p => p.CategoryName).Distinct().OrderBy(x => x).ToList();
             StateHasChanged();
         }
     }
+
     void ChangePage(int page)
     {
         if (page >= 1 && page <= totalPages)
@@ -85,6 +127,7 @@
             currentPage = page;
         }
     }
+
     void AddToCart(ProductViewModel product)
     {
         CartService.AddToCart(product);
