@@ -1,4 +1,5 @@
 ﻿@using System.Security.Claims
+@using ETicaret_UI.ViewModals
 @inject ETicaret_UI.Services.RequestManager RequestManager
 @rendermode InteractiveServer
 @attribute [StreamRendering]
@@ -18,13 +19,20 @@
 
         <!-- Menü -->
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto links">
+            <ul class="navbar-nav ms-auto links ms-4">
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/">Ana Sayfa</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/">Hesabım</a>
                 </li>
+                <AuthorizeView Roles="customer">
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="myOrders">Siparişlerim</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
 
                 <AuthorizeView Roles="admin">
                     <Authorized>
@@ -32,6 +40,12 @@
                             <a class="nav-link text-white" href="admin">Admin Paneli</a>
                         </li>
                     </Authorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="shopUser">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/shop/@shopId">Mağazam</a>
+                    </li>
                 </AuthorizeView>
 
                 <li class="nav-item">
@@ -53,3 +67,27 @@
         </div>
     </div>
 </header>
+
+@code {
+    int shopId = 0;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
+            if (user != null)
+            {
+                ApiSettings.userId = user.Id.ToString();
+
+                var shopUser = await RequestManager.GetAsync<ShopUserViewModal>(ApiSettings.GetShopByUserId);
+                ApiSettings.userId = "";
+
+                if (shopUser != null && shopUser.UserId == user.Id)
+                {
+                    shopId = shopUser.ShopId;
+                    StateHasChanged();
+                }
+            }
+        }
+    }
+}

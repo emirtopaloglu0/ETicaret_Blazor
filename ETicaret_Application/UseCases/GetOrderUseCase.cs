@@ -52,6 +52,8 @@ namespace ETicaret_Application.UseCases
                 {
                     Id = item.Id,
                     OrderDate = item.OrderDate,
+                    DeliveryDate = item.DeliveryDate,
+                    ShippingAddress = item.ShippingAddress,
                     TotalAmount = item.TotalAmount,
                     Status = item.Status,
                     CompanyName = item.DeliveryCompanyName,
@@ -65,15 +67,32 @@ namespace ETicaret_Application.UseCases
         {
             //if (_currentUser.UserId == null) throw new UnauthorizedAccessException();
             var response = await _orderRepo.GetWithItemsAsync(id);
+            List<OrderItemDTO> orderItemList = new List<OrderItemDTO>();
+
+            foreach (var item in response.orderItems)
+            {
+                var product = await _productRepo.GetByIdAsync(item.ProductId);
+                var orderItem = new OrderItemDTO(item.ProductId, item.Quantity, item.UnitPrice)
+                {
+                    Id = item.Id,
+                    OrderId = item.OrderId,
+                    ProductName = product.Name,
+                    ProductURL = product.ImageUrl
+                };
+                orderItemList.Add(orderItem);
+            }
+
             //if (_currentUser.UserId != response.UserId) throw new UnauthorizedAccessException();
             var getOrderWithItem = new GetOrderWithItemsDto
             {
                 OrderDate = response.OrderDate,
+                DeliveryDate = response.DeliveryDate,
+                ShippingAddress = response.ShippingAddress,
                 TotalAmount = response.TotalAmount,
                 Status = response.Status,
                 CompanyName = response.DeliveryCompanyName,
                 CompanyId = response.DeliveryCompanyId,
-                Items = response.orderItems
+                Items = orderItemList
             };
 
             return getOrderWithItem;

@@ -163,18 +163,19 @@ namespace ETicaret_Infrastructure.Data.Repositories
 
         public async Task<ETicaret_Core.Entities.Product?> GetByIdAsync(int id)
         {
-            var test = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
-            var test2 = new ETicaret_Core.Entities.Product
+            var response = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var domain = new ETicaret_Core.Entities.Product
             {
-                Id = test.Id,
-                CategoryId = test.CategoryId,
-                ShopId = test.ShopId,
-                Name = test.Name,
-                Description = test.Description,
-                Stock = test.Stock,
-                Price = test.Price,
+                Id = response.Id,
+                CategoryId = response.CategoryId,
+                ShopId = response.ShopId,
+                Name = response.Name,
+                Description = response.Description,
+                Stock = response.Stock,
+                Price = response.Price,
+                ImageUrl = response.ImageUrl,
             };
-            return test2;
+            return domain;
         }
 
         public async Task<bool> UpdateAsync(int id, ETicaret_Core.Entities.Product product, int shopUserId = 0)

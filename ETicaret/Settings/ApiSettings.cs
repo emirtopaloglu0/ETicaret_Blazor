@@ -60,8 +60,12 @@
         #endregion
 
         #region Orders
+        public int orderId { get; set; }
+
         public string CompleteOrder => $"{BaseUrl}Orders";
         public string GetOrdersByUser => $"{BaseUrl}Orders/byUser";
+        public string GetOrderWithItems => $"{BaseUrl}Orders/withItems/{orderId}";
+        public string CancelOrder => $"{BaseUrl}Orders/updateCargo/{orderId}";
         #endregion
 
     }

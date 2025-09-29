@@ -59,16 +59,13 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "deliverer,admin")]
+        [Authorize(Roles = "deliverer,admin,customer")]
         [HttpPut("updateCargo/{id}")]
-        public async Task<ActionResult> UpdateStatus(int id, string status)
+        public async Task<ActionResult> UpdateStatus(int id, [FromBody] string status)
         {
             //Kargocular comboboxtan seçerek yapar burayı.
             await _orderRepository.UpdateCargoStatus(id, status);
             return Ok();
         }
-
-        private record UpdateCargoStatus(string status);
-
     }
 }

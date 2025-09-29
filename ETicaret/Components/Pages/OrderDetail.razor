@@ -1,0 +1,201 @@
+﻿@page "/orderDetail"
+@page "/orderDetail/{id}"
+@using ETicaret_UI.ViewModals
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Sipariş Detayı</PageTitle>
+
+<div class="container my-5">
+
+    <BlazoredToasts Position="ToastPosition.BottomRight"
+                    Timeout="10"
+                    ShowCloseButton="@true"
+                    MaxToastCount="3"
+                    IconType="IconType.FontAwesome"
+                    SuccessClass="success-toast-override"
+                    SuccessIcon="fa fa-thumbs-up"
+                    ErrorIcon="fa fa-bug" />
+
+    @if (orderWithItems != null)
+    {
+        <div class="card shadow-lg rounded-4 border-0">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold text-primary">
+                    <i class="bi bi-receipt"></i> Sipariş Detayı
+                </h4>
+                <span class="badge @GetStatusBadge(orderWithItems.Status) px-3 py-2 fs-6">
+                    @orderWithItems.Status
+                </span>
+            </div>
+
+            <div class="card-body">
+                <!-- Sipariş Bilgileri -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong><i class="bi bi-calendar-date"></i> Sipariş Tarihi:</strong>
+                        <div>@orderWithItems.OrderDate.ToString("dd.MM.yyyy")</div>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="bi bi-truck"></i> Teslim Tarihi:</strong>
+                        <div>
+                            @(orderWithItems.DeliveryDate.HasValue
+                                                    ? orderWithItems.DeliveryDate.Value.ToString("dd.MM.yyyy")
+                                                    : "-")
+                    </div>
+                </div>
+            </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong><i class="bi bi-geo-alt"></i> Adres:</strong>
+                        <div>@orderWithItems.ShippingAddress</div>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="bi bi-building"></i> Kargo Firması:</strong>
+                        <div>@orderWithItems.CompanyName</div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <strong><i class="bi bi-cash-stack"></i> Toplam Tutar:</strong>
+                        <div class="text-success fw-bold fs-5">@orderWithItems.TotalAmount.ToString("C")</div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <!-- Sipariş Ürünleri -->
+                <h5 class="fw-bold mb-3 text-secondary">
+                    <i class="bi bi-cart-check"></i> Sipariş Ürünleri
+                </h5>
+
+            @if (orderItem != null && orderItem.Any())
+                {
+                    <div class="row g-3">
+                        @foreach (var item in orderItem)
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 shadow-sm border-0 hover-shadow">
+                                    <img src="@item.ProductURL" class="card-img-top rounded-top"
+                                         style="height:200px; object-fit:cover;" />
+                                    <div class="card-body d-flex flex-column">
+                                        <h6 class="card-title fw-bold">@item.ProductName</h6>
+                                        <p class="card-text text-muted mb-2">
+                                            <small>Adet: @item.Quantity</small>
+                                        </p>
+                                        <p class="fw-bold text-success mt-auto fs-6">@item.UnitPrice.ToString("C")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        Siparişe ait ürün bulunmamaktadır.
+                    </div>
+                }
+            </div>
+
+            <!-- Footer -->
+            <div class="card-footer d-flex justify-content-between align-items-center bg-white">
+                @if (orderWithItems.Status != "Iptal")
+                {
+                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                        <i class="bi bi-x-circle"></i> İptal Et
+                    </button>
+                }
+                <button class="btn btn-outline-primary" @onclick="GoBack">
+                    <i class="bi bi-arrow-left"></i> Geri
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="cancelModalLabel"><i class="bi bi-exclamation-triangle"></i> Sipariş İptali</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                Bu siparişi iptal etmek istediğinizden emin misiniz?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmCancelOrder" data-bs-dismiss="modal">Evet, İptal Et</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string id { get; set; }
+    GetOrderWithItemsViewModel? orderWithItems;
+    List<OrderItemViewModel> orderItem = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ApiSettings.orderId = Convert.ToInt32(id);
+            orderWithItems = await RequestManager.GetAsync<GetOrderWithItemsViewModel>(ApiSettings.GetOrderWithItems);
+            ApiSettings.orderId = 0;
+            orderItem = orderWithItems?.Items ?? new List<OrderItemViewModel>();
+            StateHasChanged();
+        }
+    }
+
+    void GoBack()
+    {
+        navigationManager.NavigateTo("/myOrders");
+    }
+
+    string GetStatusBadge(string status)
+    {
+        return status switch
+        {
+            "Tamamlandı" => "bg-success",
+            "Bekliyor" => "bg-warning text-dark",
+            "Kargoda" => "bg-info text-dark",
+            "Iptal" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    async Task ConfirmCancelOrder()
+    {
+        try
+        {
+            if (orderWithItems.Status == "Kargoda")
+            {
+                ToastService.ShowError("Ürün kargoya verilmiştir, iptal edemezsiniz");
+                return;
+            }
+            ApiSettings.orderId = Convert.ToInt32(id);
+            await RequestManager.PutAsync<string, object>(ApiSettings.CancelOrder, "Iptal");
+            ApiSettings.orderId = 0;
+            ToastService.ShowSuccess("Sipariş Başarılı Şekilde İptal Edildi");
+            await Task.Delay(1500);
+            navigationManager.NavigateTo("/myOrders");
+        }
+        catch
+        {
+            ToastService.ShowError("Beklenmedik Bir Hata Oluştu");
+        }
+    }
+}

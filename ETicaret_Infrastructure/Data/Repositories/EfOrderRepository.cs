@@ -112,7 +112,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
         }
         public async Task UpdateCargoStatus(int id, string status)
         {
-            var order = _context.Orders.Find(id);
+            var order = await _context.Orders.FindAsync(id);
             order.Status = status;
             await _context.SaveChangesAsync();
         }
