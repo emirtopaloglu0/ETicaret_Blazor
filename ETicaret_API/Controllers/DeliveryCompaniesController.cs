@@ -1,6 +1,7 @@
 ﻿using ETicaret_Application.DTOs.OrderDTOs;
 using ETicaret_Application.Interfaces;
 using ETicaret_Core.Entities;
+using ETicaret_UI.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         // POST api/<DeliveryCompaniesController>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] string Name)
@@ -50,7 +51,7 @@ namespace ETicaret_API.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         // PUT api/<DeliveryCompaniesController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] string Name)
@@ -59,7 +60,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         // DELETE api/<DeliveryCompaniesController>/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)

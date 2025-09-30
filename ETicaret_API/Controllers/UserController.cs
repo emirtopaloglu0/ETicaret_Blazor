@@ -1,6 +1,7 @@
 ﻿using ETicaret_Application.DTOs.ProductDTOs;
 using ETicaret_Application.DTOs.UserDTOs;
 using ETicaret_Application.Interfaces;
+using ETicaret_UI.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +41,7 @@ namespace ETicaret_API.Controllers
             });
         }
 
-        [Authorize(Roles = "admin")]
+        //[Authorize(Roles = $"{UserRoleEnums.Admin}")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -81,7 +82,7 @@ namespace ETicaret_API.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         [HttpPut("changeRole/{id}")]
         public async Task<IActionResult> ChangeRole(int id, [FromBody] ChangeRole changeRole)
         {
@@ -89,7 +90,7 @@ namespace ETicaret_API.Controllers
             return Ok();
         }
 
-        
+
     }
     public record UpdateUserRequest(string Email, string FirstName, string LastName, string Password);
     public record ChangeRole(string role, int companyId = 0, int shopId = 0);

@@ -1,5 +1,6 @@
 ﻿using ETicaret_Application.Interfaces;
 using ETicaret_Core.Entities;
+using ETicaret_UI.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -36,7 +37,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         // POST api/<ShopController>
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] PostRequest postRequest)
@@ -49,7 +50,7 @@ namespace ETicaret_API.Controllers
             await _shopRepository.AddAsync(shop);
             return Ok("İşlem Başarılı");
         }
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         // POST api/<ShopController>
         [HttpPost("shopUser")]
         public async Task<ActionResult> AddShopUser([FromBody] ShopUserRequest shopUserRequest)
@@ -64,7 +65,7 @@ namespace ETicaret_API.Controllers
             else return BadRequest("Bu kullanıcı, mağaza kullanıcısı değil");
         }
 
-        [Authorize(Roles = "admin,shopUser")]
+        [Authorize(Roles = $"{UserRoleEnums.Admin},{UserRoleEnums.ShopUser}")]
         // PUT api/<ShopController>/5
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromBody] PostRequest postRequest)
@@ -78,7 +79,7 @@ namespace ETicaret_API.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         // DELETE api/<ShopController>/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
@@ -87,7 +88,7 @@ namespace ETicaret_API.Controllers
             return Ok("İşlem Başarılı");
         }
 
-        [Authorize(Roles = "admin,shopUser")]
+        [Authorize(Roles = $"{UserRoleEnums.Admin},{UserRoleEnums.ShopUser}")]
         [HttpGet("GetShopUserById/{userId}")]
         public async Task<ActionResult<ShopUser>> GetShopUser(int userId)
         {

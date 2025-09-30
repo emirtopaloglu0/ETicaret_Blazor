@@ -1,6 +1,7 @@
 ﻿using ETicaret_Application.DTOs.ProductDTOs;
 using ETicaret_Application.Interfaces;
 using ETicaret_Application.UseCases;
+using ETicaret_UI.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace ETicaret_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
+
     public class ProductCategoryController : ControllerBase
     {
         private readonly ProductCategoryUseCase _categoryUseCase;
@@ -20,7 +21,7 @@ namespace ETicaret_API.Controllers
             _productCategoryRepository = productCategoryRepository;
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateProductCategoryDto dto)
         {
@@ -50,7 +51,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory(int id, UpdateCategoryRequest request)
         {
@@ -58,7 +59,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = UserRoleEnums.Admin)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {

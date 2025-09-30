@@ -1,5 +1,6 @@
 ﻿using ETicaret_Application.Interfaces;
 using ETicaret_Core.Entities;
+using ETicaret_UI.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -60,7 +61,7 @@ namespace ETicaret_API.Controllers
         }
 
         // POST api/<ProductController>
-        [Authorize(Roles = "admin,shopUser")]
+        [Authorize(Roles = $"{UserRoleEnums.Admin},{UserRoleEnums.ShopUser}")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] _product _product)
         {
@@ -86,7 +87,7 @@ namespace ETicaret_API.Controllers
         }
 
         // PUT api/<ProductController>/5
-        [Authorize(Roles = "admin,shopUser")]
+        [Authorize(Roles = $"{UserRoleEnums.Admin},{UserRoleEnums.ShopUser}")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] _product _product)
         {
@@ -112,7 +113,7 @@ namespace ETicaret_API.Controllers
         }
 
         // DELETE api/<ProductController>/5
-        [Authorize(Roles = "admin,shopUser")]
+        [Authorize(Roles = $"{UserRoleEnums.Admin},{UserRoleEnums.ShopUser}")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
