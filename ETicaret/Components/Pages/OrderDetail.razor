@@ -169,10 +169,10 @@
     {
         return status switch
         {
-            "Tamamlandı" => "bg-success",
-            "Bekliyor" => "bg-warning text-dark",
-            "Kargoda" => "bg-info text-dark",
-            "Iptal" => "bg-danger",
+            OrderStatus.Tamamlandi => "bg-success",
+            OrderStatus.Bekliyor => "bg-warning text-dark",
+            OrderStatus.Kargoda => "bg-info text-dark",
+            OrderStatus.Iptal => "bg-danger",
             _ => "bg-secondary"
         };
     }
@@ -187,7 +187,7 @@
                 return;
             }
             ApiSettings.orderId = Convert.ToInt32(id);
-            await RequestManager.PutAsync<string, object>(ApiSettings.CancelOrder, "Iptal");
+            await RequestManager.PutAsync<string, object>(ApiSettings.UpdateOrderStatus, OrderStatus.Iptal);
             ApiSettings.orderId = 0;
             ToastService.ShowSuccess("Sipariş Başarılı Şekilde İptal Edildi");
             await Task.Delay(1500);

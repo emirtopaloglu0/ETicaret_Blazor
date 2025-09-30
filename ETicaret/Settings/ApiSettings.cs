@@ -70,7 +70,7 @@
         public string CompleteOrder => $"{BaseUrl}Orders";
         public string GetOrdersByUser => $"{BaseUrl}Orders/byUser";
         public string GetOrderWithItems => $"{BaseUrl}Orders/withItems/{orderId}";
-        public string CancelOrder => $"{BaseUrl}Orders/updateCargo/{orderId}";
+        public string UpdateOrderStatus => $"{BaseUrl}Orders/updateCargo/{orderId}";
         public string GetOrdersByCompanyId => $"{BaseUrl}Orders/GetByCompanyId/{companyId}";
         #endregion
 

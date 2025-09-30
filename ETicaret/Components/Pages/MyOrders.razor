@@ -141,9 +141,10 @@
     {
         return status switch
         {
-            "Tamamlandı" => "bg-success",
-            "Bekliyor" => "bg-warning text-dark",
-            "Iptal" => "bg-danger",
+            OrderStatus.Tamamlandi => "bg-success",
+            OrderStatus.Bekliyor => "bg-warning text-dark",
+            OrderStatus.Kargoda => "bg-info text-dark",
+            OrderStatus.Iptal => "bg-danger",
             _ => "bg-secondary"
         };
     }

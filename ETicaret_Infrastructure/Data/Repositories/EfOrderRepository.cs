@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using ETicaret_Application.DTOs;
 using System.Globalization;
 using ETicaret_Application.DTOs.OrderDTOs;
+using ETicaret_UI.Enums;
 
 
 namespace ETicaret_Infrastructure.Data.Repositories
@@ -63,7 +64,9 @@ namespace ETicaret_Infrastructure.Data.Repositories
 
         public async Task<List<ETicaret_Core.Entities.Order>?> GetOrdersAsync(int userId)
         {
-            var db = await _context.Orders.Include(x => x.DeliveryCompany).Where(x => x.UserId == userId).ToListAsync();
+            var db = await _context.Orders.Include(x => x.DeliveryCompany).Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.OrderDate)
+                .ToListAsync();
             List<ETicaret_Core.Entities.Order> dtoList = new List<ETicaret_Core.Entities.Order>();
             foreach (var dbOrder in db)
             {
@@ -114,12 +117,24 @@ namespace ETicaret_Infrastructure.Data.Repositories
         public async Task UpdateCargoStatus(int id, string status)
         {
             var order = await _context.Orders.FindAsync(id);
+
+            if (status == OrderStatus.Kargoda)
+            {
+                order.DeliveryDate = DateTime.Now.AddDays(3);
+            }
+            if (status == OrderStatus.Tamamlandi)
+            {
+                order.DeliveryDate = DateTime.Now;
+            }
+
             order.Status = status;
             await _context.SaveChangesAsync();
         }
         public async Task<List<GetOrderDto>> GetByCompanyId(int id)
         {
-            var orders = await _context.Orders.Include(x => x.DeliveryCompany).Where(x => x.DeliveryCompanyId == id).ToListAsync();
+            var orders = await _context.Orders.Include(x => x.DeliveryCompany).Where(x => x.DeliveryCompanyId == id)
+                .OrderByDescending(x => x.OrderDate)
+                .ToListAsync();
             List<GetOrderDto> result = new List<GetOrderDto>();
             foreach (var order in orders)
             {
