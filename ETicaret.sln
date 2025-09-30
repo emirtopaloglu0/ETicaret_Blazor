@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETicaret_Application", "ETi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETicaret_Infrastructure", "ETicaret_Infrastructure\ETicaret_Infrastructure.csproj", "{720519FD-B1B7-4F6F-AAEB-31C5D9CFE234}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enums", "Enums\Enums.csproj", "{598E7017-4A1D-4097-B4B1-A3E4678F981E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{720519FD-B1B7-4F6F-AAEB-31C5D9CFE234}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{720519FD-B1B7-4F6F-AAEB-31C5D9CFE234}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{720519FD-B1B7-4F6F-AAEB-31C5D9CFE234}.Release|Any CPU.Build.0 = Release|Any CPU
+		{598E7017-4A1D-4097-B4B1-A3E4678F981E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{598E7017-4A1D-4097-B4B1-A3E4678F981E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{598E7017-4A1D-4097-B4B1-A3E4678F981E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{598E7017-4A1D-4097-B4B1-A3E4678F981E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

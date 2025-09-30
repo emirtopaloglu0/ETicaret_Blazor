@@ -14,5 +14,6 @@ namespace ETicaret_Application.Interfaces
         Task<DeliveryCompany> GetDeliveryCompanyById(int id);
         Task<DeliveryCompany> UpdateCompany(int id, string name);
         Task DeleteCompany(int id);
+        Task<Deliverer> GetDeliveryCompanyByUserId(int userId);
     }
 }

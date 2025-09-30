@@ -1,4 +1,5 @@
-﻿using ETicaret_Core.Entities;
+﻿using ETicaret_Application.DTOs.OrderDTOs;
+using ETicaret_Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,6 @@ namespace ETicaret_Application.Interfaces
         Task<List<Order>?> GetOrdersAsync(int userId);
         Task<Order?> GetWithItemsAsync(int id);
         Task UpdateCargoStatus(int id, string status);
+        Task<List<GetOrderDto>> GetByCompanyId(int id);
     }
 }

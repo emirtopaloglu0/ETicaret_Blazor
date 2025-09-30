@@ -102,7 +102,7 @@
 
             <!-- Footer -->
             <div class="card-footer d-flex justify-content-between align-items-center bg-white">
-                @if (orderWithItems.Status != "Iptal")
+                @if (orderWithItems.Status != OrderStatus.Iptal)
                 {
                     <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
                         <i class="bi bi-x-circle"></i> İptal Et
@@ -181,7 +181,7 @@
     {
         try
         {
-            if (orderWithItems.Status == "Kargoda")
+            if (orderWithItems.Status == OrderStatus.Kargoda)
             {
                 ToastService.ShowError("Ürün kargoya verilmiştir, iptal edemezsiniz");
                 return;

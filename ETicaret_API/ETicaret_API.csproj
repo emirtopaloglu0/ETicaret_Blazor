@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Enums\Enums.csproj" />
     <ProjectReference Include="..\ETicaret_Application\ETicaret_Application.csproj" />
     <ProjectReference Include="..\ETicaret_Infrastructure\ETicaret_Infrastructure.csproj" />
   </ItemGroup>

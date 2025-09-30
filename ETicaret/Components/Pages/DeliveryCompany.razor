@@ -1,0 +1,46 @@
+﻿@page "/deliveries";
+@page "/deliveries/{companyId}"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+
+<AuthorizeView Roles="@UserRoleEnums.Deliverer">
+
+    <Authorized>
+        <h3>DeliveryCompany</h3>
+
+        @if (orders != null)
+        {
+            @foreach (var order in orders)
+            {
+                if (order.Status == OrderStatus.Bekliyor)
+                {
+                    @order.OrderDate
+                }
+            }
+        }
+    </Authorized>
+
+    <NotAuthorized>
+        <ETicaret_UI.Components.Pages.AuthPages.AccessDenied />
+    </NotAuthorized>
+
+</AuthorizeView>
+
+@code {
+    [Parameter] public string companyId { get; set; }
+
+    DeliveryCompanyViewModel deliveryCompany = new();
+    List<GetOrderWithItemsViewModel> orders = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ApiSettings.companyId = Convert.ToInt32(companyId);
+            // deliveryCompany = await RequestManager.GetAsync<DeliveryCompanyViewModel>(ApiSettings.GetCompanyById);
+            orders = await RequestManager.GetAsync<List<GetOrderWithItemsViewModel>>(ApiSettings.GetOrdersByCompanyId);
+            StateHasChanged();
+        }
+    }
+}

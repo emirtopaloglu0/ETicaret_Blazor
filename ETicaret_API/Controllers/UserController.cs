@@ -88,6 +88,8 @@ namespace ETicaret_API.Controllers
             await _authService.ChangeUserRole(id, changeRole.role, changeRole.companyId, changeRole.shopId);
             return Ok();
         }
+
+        
     }
     public record UpdateUserRequest(string Email, string FirstName, string LastName, string Password);
     public record ChangeRole(string role, int companyId = 0, int shopId = 0);

@@ -72,5 +72,28 @@ namespace ETicaret_Infrastructure.Data.Repositories
                 Name = company.Name
             };
         }
+
+        public async Task<ETicaret_Core.Entities.Deliverer> GetDeliveryCompanyByUserId(int userId)
+        {
+            var deliverer = await _context.Deliverers.Include(x => x.Company).Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == userId);
+
+            if (deliverer != null)
+            {
+                var domain = new ETicaret_Core.Entities.Deliverer
+                {
+                    Id = deliverer.Id,
+                    UserId = deliverer.UserId,
+                    FirstName = deliverer.User.FirstName,
+                    LastName = deliverer.User.LastName,
+                    CompanyId = deliverer.CompanyId,
+                    CompanyName = deliverer.Company.Name,
+                };
+                return domain;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

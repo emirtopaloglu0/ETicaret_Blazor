@@ -26,7 +26,7 @@
                 <li class="nav-item">
                     <a class="nav-link text-white" href="profile">Hesabım</a>
                 </li>
-                <AuthorizeView Roles="customer">
+                <AuthorizeView Roles="@UserRoleEnums.Customer">
                     <Authorized>
                         <li class="nav-item">
                             <a class="nav-link text-white" href="myOrders">Siparişlerim</a>
@@ -34,7 +34,7 @@
                     </Authorized>
                 </AuthorizeView>
 
-                <AuthorizeView Roles="admin">
+                <AuthorizeView Roles="@UserRoleEnums.Admin">
                     <Authorized>
                         <li class="nav-item">
                             <a class="nav-link text-white" href="admin">Admin Paneli</a>
@@ -42,10 +42,20 @@
                     </Authorized>
                 </AuthorizeView>
 
-                <AuthorizeView Roles="shopUser">
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/shop/@shopId">Mağazam</a>
-                    </li>
+                <AuthorizeView Roles="@UserRoleEnums.ShopUser">
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/shop/@shopId">Mağazam</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="@UserRoleEnums.Deliverer">
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/deliveries/@deliveryCompanyId">Kargolar</a>
+                        </li>
+                    </Authorized>
                 </AuthorizeView>
 
                 <li class="nav-item">
@@ -70,24 +80,38 @@
 
 @code {
     int shopId = 0;
+    int deliveryCompanyId = 0;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             var user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
+
             if (user != null)
             {
                 ApiSettings.userId = user.Id.ToString();
-
-                var shopUser = await RequestManager.GetAsync<ShopUserViewModal>(ApiSettings.GetShopByUserId);
-                ApiSettings.userId = "";
-
-                if (shopUser != null && shopUser.UserId == user.Id)
+                if (user.Role == UserRoleEnums.ShopUser)
                 {
-                    shopId = shopUser.ShopId;
-                    StateHasChanged();
+                    var shopUser = await RequestManager.GetAsync<ShopUserViewModal>(ApiSettings.GetShopByUserId);
+
+                    if (shopUser != null && shopUser.UserId == user.Id)
+                    {
+                        shopId = shopUser.ShopId;
+
+                    }
                 }
+                else if (user.Role == UserRoleEnums.Deliverer)
+                {
+                    var deliverer = await RequestManager.GetAsync<DelivererViewModal>(ApiSettings.GetCompanyByUserId);
+                    if (deliverer != null && deliverer.UserId == user.Id)
+                    {
+                        deliveryCompanyId = deliverer.CompanyId;
+                    }
+                }
+                StateHasChanged();
+                ApiSettings.userId = "";
             }
+
         }
     }
 }

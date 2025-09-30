@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Security.Claims;
+using ETicaret_UI.Enums;
 
 namespace ETicaret_API.Controllers
 {
@@ -59,7 +60,7 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = "deliverer,admin,customer")]
+        [Authorize(Roles = $"{UserRoleEnums.Deliverer},{UserRoleEnums.Admin},{UserRoleEnums.Customer}")]
         [HttpPut("updateCargo/{id}")]
         public async Task<ActionResult> UpdateStatus(int id, [FromBody] string status)
         {
@@ -67,5 +68,13 @@ namespace ETicaret_API.Controllers
             await _orderRepository.UpdateCargoStatus(id, status);
             return Ok();
         }
+
+        [HttpGet("GetByCompanyId/{id}")]
+        public async Task<ActionResult<IEnumerable<List<GetOrderDto>>>> GetOrdersByCompanyId(int id)
+        {
+            var response = await _orderRepository.GetByCompanyId(id);
+            return Ok(response);
+        }
+
     }
 }

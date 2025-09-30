@@ -50,6 +50,8 @@
         public string AddCompany => $"{BaseUrl}DeliveryCompanies";
         public string UpdateCompany => $"{BaseUrl}DeliveryCompanies/{companyId}";
         public string DeleteCompany => $"{BaseUrl}DeliveryCompanies/{companyId}";
+        public string GetCompanyByUserId => $"{BaseUrl}DeliveryCompanies/GetCompanyByUser/{userId}";
+        public string GetCompanyById => $"{BaseUrl}DeliveryCompanies/{companyId}";
         #endregion
 
         #region Products
@@ -69,6 +71,7 @@
         public string GetOrdersByUser => $"{BaseUrl}Orders/byUser";
         public string GetOrderWithItems => $"{BaseUrl}Orders/withItems/{orderId}";
         public string CancelOrder => $"{BaseUrl}Orders/updateCargo/{orderId}";
+        public string GetOrdersByCompanyId => $"{BaseUrl}Orders/GetByCompanyId/{companyId}";
         #endregion
 
     }

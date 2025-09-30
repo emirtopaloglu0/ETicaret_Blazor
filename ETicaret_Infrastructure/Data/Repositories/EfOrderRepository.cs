@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ETicaret_Application.DTOs;
 using System.Globalization;
+using ETicaret_Application.DTOs.OrderDTOs;
 
 
 namespace ETicaret_Infrastructure.Data.Repositories
@@ -115,6 +116,26 @@ namespace ETicaret_Infrastructure.Data.Repositories
             var order = await _context.Orders.FindAsync(id);
             order.Status = status;
             await _context.SaveChangesAsync();
+        }
+        public async Task<List<GetOrderDto>> GetByCompanyId(int id)
+        {
+            var orders = await _context.Orders.Include(x => x.DeliveryCompany).Where(x => x.DeliveryCompanyId == id).ToListAsync();
+            List<GetOrderDto> result = new List<GetOrderDto>();
+            foreach (var order in orders)
+            {
+                result.Add(new GetOrderDto
+                {
+                    Id = order.Id,
+                    OrderDate = order.OrderDate,
+                    DeliveryDate = order.DeliveryDate,
+                    TotalAmount = order.TotalAmount,
+                    Status = order.Status,
+                    ShippingAddress = order.ShippingAddress,
+                    CompanyName = order.DeliveryCompany.Name,
+                    CompanyId = order.DeliveryCompanyId
+                });
+            }
+            return result;
         }
     }
 }

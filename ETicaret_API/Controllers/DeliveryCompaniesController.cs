@@ -67,5 +67,14 @@ namespace ETicaret_API.Controllers
             await _companyRepository.DeleteCompany(id);
             return Ok();
         }
+
+        [HttpGet("GetCompanyByUser/{userId}")]
+        public async Task<ActionResult<Deliverer>> GetCompanyByUserId(int userId)
+        {
+            var response = await _companyRepository.GetDeliveryCompanyByUserId(userId);
+            if (response is null) return BadRequest();
+
+            return Ok(response);
+        }
     }
 }

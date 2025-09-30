@@ -137,7 +137,7 @@ public class AuthService : IAuthService
         }
         else if (user.Role != "deliverer" && role == "deliverer")
         {
-            Deliverer deliverer = new();
+            Data.Entities.Deliverer deliverer = new();
             deliverer.UserId = user.Id;
             deliverer.CompanyId = companyId;
             _context.Deliverers.Add(deliverer);
