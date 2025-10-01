@@ -168,6 +168,18 @@
     {
         try
         {
+            if (companyId <= 0)
+            {
+                ToastService.ShowError("Kargo Firması Seçiniz");
+                await Task.Delay(1500);
+                return;
+            }
+            if (address == "")
+            {
+                ToastService.ShowError("Lütfen Adres Giriniz");
+                await Task.Delay(1500);
+                return;
+            }
             List<CreateOrderItemViewModal> orderItems = new();
             cartItems = CartService.Items;
             foreach (var item in cartItems)
