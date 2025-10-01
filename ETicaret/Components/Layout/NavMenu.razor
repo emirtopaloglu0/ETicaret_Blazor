@@ -23,9 +23,14 @@
                 <li class="nav-item">
                     <a class="nav-link text-white" href="/">Ana Sayfa</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="profile">Hesabım</a>
-                </li>
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="profile">Hesabım</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+
                 <AuthorizeView Roles="@UserRoleEnums.Customer">
                     <Authorized>
                         <li class="nav-item">
@@ -53,7 +58,7 @@
                 <AuthorizeView Roles="@UserRoleEnums.Deliverer">
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/deliveries/@deliveryCompanyId">Kargolar</a>
+                            <a class="nav-link text-white" href="/deliveries/@deliveryCompanyId">Teslimatlar</a>
                         </li>
                     </Authorized>
                 </AuthorizeView>

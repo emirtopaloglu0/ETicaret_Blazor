@@ -105,6 +105,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
             {
                 Id = dbOrder.Id,
                 OrderDate = dbOrder.OrderDate,
+                DeliveryDate = dbOrder.DeliveryDate,
                 TotalAmount = dbOrder.TotalAmount,
                 Status = dbOrder.Status,
                 ShippingAddress = dbOrder.ShippingAddress,
