@@ -296,54 +296,77 @@
 
     async Task SaveProduct()
     {
-        var payload = new
+        try
         {
-            CategoryId = productForm.CategoryId,
-            ShopId = id,
-            Name = productForm.Name,
-            Description = productForm.Description,
-            Stock = productForm.Stock,
-            Price = productForm.Price,
-            ImageUrl = string.IsNullOrEmpty(productForm.ImageUrl) ? string.Empty : productForm.ImageUrl
-        };
-        var response = await RequestManager.PostAsync<object, string>(ApiSettings.AddProduct, payload);
-        if (response != null)
-        {
-            ToastService.ShowSuccess("Ürün eklendi");
+            var payload = new
+            {
+                CategoryId = productForm.CategoryId,
+                ShopId = id,
+                Name = productForm.Name,
+                Description = productForm.Description,
+                Stock = productForm.Stock,
+                Price = productForm.Price,
+                ImageUrl = string.IsNullOrEmpty(productForm.ImageUrl) ? string.Empty : productForm.ImageUrl
+            };
+            var response = await RequestManager.PostAsync<object, string>(ApiSettings.AddProduct, payload);
+            if (response != null)
+            {
+                ToastService.ShowSuccess("Ürün eklendi");
+            }
+            await CloseModal();
         }
-        await CloseModal();
+        catch
+        {
+            ToastService.ShowError("Beklenmeyen Bir Hata Oluştu");
+        }
     }
 
     async Task UpdateProduct()
     {
-        var payload = new
+        try
         {
-            CategoryId = productForm.CategoryId,
-            ShopId = id,
-            Name = productForm.Name,
-            Description = productForm.Description,
-            Stock = productForm.Stock,
-            Price = productForm.Price,
-            ImageUrl = string.IsNullOrEmpty(productForm.ImageUrl) ? string.Empty : productForm.ImageUrl
-        };
-        ApiSettings.productId = productForm.Id;
-        await RequestManager.PutAsync<object, string>(ApiSettings.UpdateProduct, payload);
-        ApiSettings.productId = 0;
+            var payload = new
+            {
+                CategoryId = productForm.CategoryId,
+                ShopId = id,
+                Name = productForm.Name,
+                Description = productForm.Description,
+                Stock = productForm.Stock,
+                Price = productForm.Price,
+                ImageUrl = string.IsNullOrEmpty(productForm.ImageUrl) ? string.Empty : productForm.ImageUrl
+            };
+            ApiSettings.productId = productForm.Id;
+            await RequestManager.PutAsync<object, string>(ApiSettings.UpdateProduct, payload);
+            ApiSettings.productId = 0;
 
-        ToastService.ShowSuccess("Ürün güncellendi");
+            ToastService.ShowSuccess("Ürün güncellendi");
 
-        await CloseModal();
+            await CloseModal();
+        }
+        catch
+        {
+            ToastService.ShowError("Bekelnmeyen Bir Hata Oluştu");
+        }
+
     }
 
     async Task DeleteProduct()
     {
-        ApiSettings.productId = selectedProduct.Id;
-        await RequestManager.DeleteAsync(ApiSettings.DeleteProduct);
-        ApiSettings.productId = 0;
+        try
+        {
+            ApiSettings.productId = selectedProduct.Id;
+            await RequestManager.DeleteAsync(ApiSettings.DeleteProduct);
+            ApiSettings.productId = 0;
 
-        ToastService.ShowSuccess("Ürün silindi");
+            ToastService.ShowSuccess("Ürün silindi");
 
-        await CloseModal();
+            await CloseModal();
+        }
+        catch
+        {
+            ToastService.ShowError("Beklenmeyen Bir Hata Oluştu");
+        }
+
     }
     void ChangePage(int page)
     {
