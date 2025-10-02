@@ -118,6 +118,8 @@ namespace ETicaret_Infrastructure.Data.Repositories
         public async Task UpdateCargoStatus(int id, string status)
         {
             var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+                throw new KeyNotFoundException($"Sipariş bulunamadı. Id: {id}");
 
             if (status == OrderStatus.Kargoda)
             {
@@ -126,6 +128,16 @@ namespace ETicaret_Infrastructure.Data.Repositories
             if (status == OrderStatus.Tamamlandi)
             {
                 order.DeliveryDate = DateTime.Now;
+            }
+            if (status == OrderStatus.Iptal)
+            {
+                var _orderItems = await _context.OrderItems.Where(x => x.OrderId == order.Id).ToListAsync();
+                foreach (var item in _orderItems)
+                {
+                    var product = await _context.Products.FindAsync(item.ProductId);
+                    product.Stock += item.Quantity;
+                    await _context.SaveChangesAsync();
+                }
             }
 
             order.Status = status;

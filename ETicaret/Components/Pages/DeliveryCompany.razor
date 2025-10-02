@@ -57,7 +57,7 @@
                                 <div class="d-flex flex-column justify-content-center align-items-end">
                                     @if (order.Status == OrderStatus.Bekliyor)
                                     {
-                                        <button class="btn btn-warning btn-sm w-100 mb-2"
+                                        <button class="btn btn-info btn-sm w-100 mb-2"
                                                 @onclick="() => OpenConfirmModal(order.Id, OrderStatus.Kargoda)">
                                             <i class="bi bi-box-seam"></i> Kargoya Al
                                         </button>
