@@ -8,6 +8,7 @@
 <PageTitle>Sepet</PageTitle>
 
 <div class="container my-5">
+
     <BlazoredToasts Position="ToastPosition.BottomRight"
                     Timeout="10"
                     ShowCloseButton="@true"
@@ -16,8 +17,9 @@
                     SuccessClass="success-toast-override"
                     SuccessIcon="fa fa-thumbs-up"
                     ErrorIcon="fa fa-bug" />
+
     <div class="row">
-        <!-- Sepet Ürünleri -->
+        @* Sepet Ürünleri *@
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-primary text-white fw-bold">
@@ -56,8 +58,7 @@
                     }
                 </div>
             </div>
-
-            <!-- Kargo ve Adres -->
+            @* Kargo ve Adres *@
             <div class="card shadow-sm border-0 rounded-3 mt-4">
                 <div class="card-header bg-light fw-bold">
                     <i class="bi bi-truck"></i> Teslimat Bilgileri
@@ -83,7 +84,7 @@
             </div>
         </div>
 
-        <!-- Sipariş Özeti -->
+        @* Sipariş Özeti *@
         <div class="col-lg-4">
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-secondary text-white fw-bold">
@@ -121,10 +122,8 @@
                         <i class="bi bi-trash"></i> Sepeti Temizle
                     </button>
                 </div>
-
             </div>
         </div>
-
     </div>
 </div>
 

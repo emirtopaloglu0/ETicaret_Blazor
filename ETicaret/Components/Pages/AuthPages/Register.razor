@@ -16,7 +16,7 @@
             <EditForm Model="RegisterModel" OnValidSubmit="RegisterUser" FormName="RegisterForm">
                 <DataAnnotationsValidator />
 
-                <!-- Ad -->
+                @* Ad *@
                 <div class="mb-3">
                     <div class="input-group input-group-lg">
                         <span class="input-group-text bg-light">
@@ -28,7 +28,7 @@
                     <ValidationMessage For="() => RegisterModel.FirstName" />
                 </div>
 
-                <!-- Soyad -->
+                @* Soyad *@
                 <div class="mb-3">
                     <div class="input-group input-group-lg">
                         <span class="input-group-text bg-light">
@@ -40,7 +40,7 @@
                     <ValidationMessage For="() => RegisterModel.LastName" />
                 </div>
 
-                <!-- E-Posta -->
+                @* E-Posta *@
                 <div class="mb-3">
                     <div class="input-group input-group-lg">
                         <span class="input-group-text bg-light">
@@ -52,7 +52,7 @@
                     <ValidationMessage For="() => RegisterModel.Email" />
                 </div>
 
-                <!-- Şifre -->
+                @* Şifre *@
                 <div class="mb-4">
                     <div class="input-group input-group-lg">
                         <span class="input-group-text bg-light">
@@ -64,7 +64,7 @@
                     <ValidationMessage For="() => RegisterModel.Password" />
                 </div>
 
-                <!-- Butonlar -->
+                @* Düğmeler *@
                 <div class="d-grid gap-3 mt-4">
                     <button type="submit" class="btn btn-gradient btn-lg rounded-pill shadow-sm">
                         <i class="bi bi-person-plus me-2"></i> Kayıt Ol
@@ -98,10 +98,10 @@
 </style>
 
 @code {
-    private string ErrorMessage = "";
-
     [SupplyParameterFromForm(FormName = "RegisterForm")]
     public RegisterViewModel RegisterModel { get; set; } = new();
+
+    private string ErrorMessage = "";
 
     private async Task RegisterUser()
     {

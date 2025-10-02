@@ -30,8 +30,6 @@ public class AuthController : ControllerBase
         var token = await _authService.LoginAsync(request.Email, request.Password);
         return Ok(new { Token = token });
     }
-
-
 }
 
 public record RegisterRequest(string Email, string FirstName, string LastName, string Password);

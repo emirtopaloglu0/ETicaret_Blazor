@@ -1,5 +1,4 @@
 ﻿@page "/logout"
-@* @inject ETicaret_UI.Auth.CustomAuthenticationStateProvider AuthProvider *@
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 @attribute [StreamRendering]
@@ -7,13 +6,11 @@
 <h3>Çıkış yapılıyor...</h3>
 
 @code {
-    private bool _hasLoggedOut = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !_hasLoggedOut)
+        if (firstRender)
         {
-            _hasLoggedOut = true; // Tekrar çalışmayı önler
             await AuthProvider.MarkUserAsLoggedOut();
             navigationManager.NavigateTo("/", true);
         }

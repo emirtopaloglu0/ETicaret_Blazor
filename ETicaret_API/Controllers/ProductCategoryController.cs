@@ -66,7 +66,6 @@ namespace ETicaret_API.Controllers
             await _productCategoryRepository.DeleteCategory(id);
             return Ok();
         }
-
         public record UpdateCategoryRequest(string Name, string Description);
 
     }

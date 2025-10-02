@@ -27,7 +27,6 @@ namespace ETicaret_API.Controllers
             _orderRepository = orderRepository;
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateOrderDto dto)
         {
@@ -79,6 +78,5 @@ namespace ETicaret_API.Controllers
             var response = await _orderRepository.GetByCompanyId(id);
             return Ok(response);
         }
-
     }
 }

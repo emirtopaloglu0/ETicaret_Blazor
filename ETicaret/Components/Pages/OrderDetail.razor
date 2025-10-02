@@ -63,9 +63,7 @@
                         <div class="text-success fw-bold fs-5">@orderWithItems.TotalAmount.ToString("C")</div>
                     </div>
                 </div>
-
                 <hr />
-
                 <!-- Sipariş Ürünleri -->
                 <h5 class="fw-bold mb-3 text-secondary">
                     <i class="bi bi-cart-check"></i> Sipariş Ürünleri
@@ -99,7 +97,6 @@
                     </div>
                 }
             </div>
-
             <!-- Footer -->
             <div class="card-footer d-flex justify-content-between align-items-center bg-white">
                 @if (orderWithItems.Status != OrderStatus.Iptal && orderWithItems.Status != OrderStatus.Tamamlandi)
@@ -109,7 +106,6 @@
                     </button>
                 }
                 <div></div>
-
                 <button class="btn btn-outline-primary" @onclick="GoBack">
                     <i class="bi bi-arrow-left"></i> Geri
                 </button>

@@ -133,7 +133,7 @@ namespace ETicaret_API.Controllers
             try
             {
                 var desc = await _descUseCase.ExecuteGenerateDescriptionAsync(id);
-                return Ok(desc); // string döner
+                return Ok(desc); 
             }
             catch (KeyNotFoundException)
             {
@@ -141,7 +141,6 @@ namespace ETicaret_API.Controllers
             }
             catch (Exception ex)
             {
-                // logla
                 return StatusCode(500, ex.Message);
             }
         }

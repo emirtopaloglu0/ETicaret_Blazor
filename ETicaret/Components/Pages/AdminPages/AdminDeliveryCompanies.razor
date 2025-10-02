@@ -68,8 +68,9 @@
                     </li>
                     @for (int i = 1; i <= totalPages; i++)
                     {
+                        int pageNo = i;
                         <li class="page-item @(currentPage == i ? "active" : "")">
-                            <button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+                            <button class="page-link" @onclick="() => GoToPage(pageNo)">@i</button>
                         </li>
                     }
                     <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
@@ -146,6 +147,14 @@
     private int pageSize = 5;
     private int totalPages => (int)Math.Ceiling((double)companies.Count / pageSize);
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ReadData();
+        }
+    }
+
     async Task ReadData()
     {
         companies.Clear();
@@ -160,14 +169,6 @@
         }
         currentPage = 1; // liste yenilenince sayfayı başa al
         StateHasChanged();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await ReadData();
-        }
     }
 
     private void ShowAddModal()

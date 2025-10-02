@@ -16,6 +16,7 @@
             <EditForm Model="LoginModel" OnValidSubmit="LoginUser" FormName="LoginForm">
                 <DataAnnotationsValidator />
 
+                @* Mail *@
                 <div class="mb-4">
                     <div class="input-group input-group-lg">
                         <span class="input-group-text bg-light">
@@ -28,6 +29,7 @@
                     <ValidationMessage For="() => LoginModel.Email" />
                 </div>
 
+                @* Şifre *@
                 <div class="mb-4">
                     <div class="input-group input-group-lg">
                         <span class="input-group-text bg-light">
@@ -40,6 +42,7 @@
                     <ValidationMessage For="() => LoginModel.Password" />
                 </div>
 
+                @* Kayıt Ol *@
                 <div class="d-grid gap-3 mt-4">
                     <button type="submit" class="btn btn-gradient btn-lg rounded-pill shadow-sm">
                         <i class="bi bi-box-arrow-in-right me-2"></i> Giriş Yap

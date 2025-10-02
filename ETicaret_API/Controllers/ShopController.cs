@@ -101,7 +101,6 @@ namespace ETicaret_API.Controllers
             };
             return shopUser;
         }
-
     }
 }
 

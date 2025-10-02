@@ -148,6 +148,14 @@
     private int pageSize = 5;
     private int totalPages => (int)Math.Ceiling((double)categories.Count / pageSize);
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ReadData();
+        }
+    }
+
     async Task ReadData()
     {
         categories.Clear();
@@ -163,14 +171,6 @@
         }
         currentPage = 1; // liste yenilenince sayfayı başa al
         StateHasChanged();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await ReadData();
-        }
     }
 
     private void ShowAddModal()
@@ -257,7 +257,6 @@
         }
     }
 
-    // Pagination methods
     private void PreviousPage()
     {
         if (currentPage > 1)
