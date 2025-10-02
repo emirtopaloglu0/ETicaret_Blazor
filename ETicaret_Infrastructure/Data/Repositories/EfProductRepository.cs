@@ -177,6 +177,26 @@ namespace ETicaret_Infrastructure.Data.Repositories
             };
             return domain;
         }
+        public async Task<ProductDTO?> GetByIdWithCompanyAndShopsAsync(int productId)
+        {
+            var response = await _context.Products.Include(x => x.Category).Include(x => x.Shop).FirstOrDefaultAsync(p => p.Id == productId);
+            var domain = new ProductDTO
+            {
+                Id = response.Id,
+                CategoryId = response.CategoryId,
+                CategoryName = response.Category.Name,
+                CategoryDesc = response.Category.Description,
+                ShopId = response.ShopId,
+                ShopName = response.Shop.Name,
+                ShopDesc = response.Shop.Description,
+                Name = response.Name,
+                Description = response.Description,
+                Stock = response.Stock,
+                Price = response.Price,
+                ImageUrl = response.ImageUrl,
+            };
+            return domain;
+        }
 
         public async Task<bool> UpdateAsync(int id, ETicaret_Core.Entities.Product product, int shopUserId = 0)
         {

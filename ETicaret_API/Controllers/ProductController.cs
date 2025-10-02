@@ -1,4 +1,6 @@
-﻿using ETicaret_Application.Interfaces;
+﻿using ETicaret_Application.DTOs.ProductDTOs;
+using ETicaret_Application.Interfaces;
+using ETicaret_Application.UseCases;
 using ETicaret_Core.Entities;
 using ETicaret_UI.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -17,10 +19,12 @@ namespace ETicaret_API.Controllers
     {
 
         private readonly IProductRepository _productRepository;
+        private readonly ProductDescriptionUseCase _descUseCase;
 
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IProductRepository productRepository, ProductDescriptionUseCase descUseCase)
         {
             _productRepository = productRepository;
+            _descUseCase = descUseCase;
         }
 
         // GET: api/<ProductController>
@@ -120,6 +124,26 @@ namespace ETicaret_API.Controllers
             var response = await _productRepository.DeleteAsync(id);
             if (!response) { return BadRequest(); }
             return Ok("Silme başarılı");
+        }
+
+        [HttpGet("generate-description/{id}")]
+        [Authorize(Roles = $"{UserRoleEnums.Admin},{UserRoleEnums.ShopUser}")]
+        public async Task<IActionResult> GenerateDescription(int id)
+        {
+            try
+            {
+                var desc = await _descUseCase.ExecuteGenerateDescriptionAsync(id);
+                return Ok(desc); // string döner
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Bulunamadı");
+            }
+            catch (Exception ex)
+            {
+                // logla
+                return StatusCode(500, ex.Message);
+            }
         }
         public record _product(int CategoryId, int ShopId, string Name, string Description,
             int Stock, decimal Price, string ImageUrl, bool isDelete = false);

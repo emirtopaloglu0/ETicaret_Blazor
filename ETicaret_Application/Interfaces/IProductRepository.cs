@@ -19,5 +19,6 @@ namespace ETicaret_Application.Interfaces
         Task DecreaseStockAsync(int productId, int quantity);
         Task<bool> UpdateAsync(int id, Product product, int shopUserId = 0);
         Task<bool> DeleteAsync(int id);
+        Task<ProductDTO> GetByIdWithCompanyAndShopsAsync(int productId);
     }
 }

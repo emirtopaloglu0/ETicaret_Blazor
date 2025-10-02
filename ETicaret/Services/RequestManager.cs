@@ -45,6 +45,14 @@ namespace ETicaret_UI.Services
             if (!response.IsSuccessStatusCode) return default;
 
             var json = await response.Content.ReadAsStringAsync();
+            // Eğer response tipi string ise JSON parse etme
+            if (typeof(T) == typeof(string))
+            {
+                return (T)(object)json;
+            }
+            if (string.IsNullOrWhiteSpace(json))
+                return default;
+
             return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 

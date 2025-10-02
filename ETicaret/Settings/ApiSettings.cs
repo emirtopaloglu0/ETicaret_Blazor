@@ -61,6 +61,7 @@
         public string AddProduct => $"{BaseUrl}Product";
         public string UpdateProduct => $"{BaseUrl}Product/{productId}";
         public string DeleteProduct => $"{BaseUrl}Product/{productId}";
+        public string GenerateDesc => $"{BaseUrl}Product/generate-description/{productId}";
 
         #endregion
 

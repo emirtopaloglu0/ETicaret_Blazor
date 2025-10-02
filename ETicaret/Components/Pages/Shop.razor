@@ -126,7 +126,17 @@
                         <div class="col-md-12">
                             <label class="form-label">Açıklama</label>
                             <textarea class="form-control" @bind="productForm.Description"></textarea>
+                            @if (modalMode != "add")
+                            {
+                                <button class="btn btn-outline-info mt-2" @onclick="() => GenerateDesc(productForm.Id)">Açıklama Oluştur</button>
+                            }
+
+                            @if (isPromptLoading)
+                            {
+                                <div class="spinner-border text-primary" role="status"></div>
+                            }
                         </div>
+
                         <div class="col-md-6">
                             <label class="form-label">Stok</label>
                             <input type="number" class="form-control" @bind="productForm.Stock" />
@@ -161,9 +171,6 @@
                                 </div>
                             }
                         </div>
-
-
-
                     </div>
                 }
             </div>
@@ -209,6 +216,8 @@
     int currentPage = 1;
     int pageSize = 8; // sayfa başına ürün
     int totalPages => (int)Math.Ceiling((decimal)(products?.Count ?? 0) / pageSize);
+
+    bool isPromptLoading = false;
 
     IEnumerable<ProductViewModel> pagedProducts =>
         products.Skip((currentPage - 1) * pageSize).Take(pageSize);
@@ -399,6 +408,21 @@
                 productForm.ImageUrl = url.Trim('"'); // örn: /uploads/xyz.jpg
             }
         }
+    }
+
+    async Task GenerateDesc(int id)
+    {
+        isPromptLoading = true;
+        ApiSettings.productId = id;
+
+        var response = await RequestManager.GetAsync<string>(ApiSettings.GenerateDesc);
+        isPromptLoading = false;
+        if (string.IsNullOrEmpty(response))
+        {
+            productForm.Description = "Üretilemedi";
+            return;
+        }
+        productForm.Description = response;
     }
 
 

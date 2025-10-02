@@ -40,6 +40,13 @@ builder.Services.AddScoped<CreateOrderUseCase>();
 builder.Services.AddScoped<GetOrderUseCase>();
 builder.Services.AddScoped<ProductCategoryUseCase>();
 
+builder.Services.AddHttpClient(); // OpenAI client için
+builder.Services.AddScoped<ProductDescriptionUseCase>();
+builder.Services.AddScoped<TemplateDescriptionGenerator>();
+
+builder.Services.AddHttpClient<OpenAiClient>();
+builder.Services.AddScoped<ILLMClient, OpenAiClient>();
+
 
 //auth
 builder.Services.AddSwaggerGen(c =>
@@ -72,11 +79,6 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
-
-
-
-
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 
