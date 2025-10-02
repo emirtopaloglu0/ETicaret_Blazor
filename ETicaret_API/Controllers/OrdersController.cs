@@ -18,7 +18,9 @@ namespace ETicaret_API.Controllers
         private readonly CreateOrderUseCase _createOrder;
         private readonly GetOrderUseCase _getOrder;
         private readonly IOrderRepository _orderRepository;
-        public OrdersController(CreateOrderUseCase createOrder, GetOrderUseCase getOrder, IOrderRepository orderRepository)
+
+        public OrdersController(CreateOrderUseCase createOrder, GetOrderUseCase getOrder,
+            IOrderRepository orderRepository)
         {
             _createOrder = createOrder;
             _getOrder = getOrder;
@@ -29,7 +31,9 @@ namespace ETicaret_API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateOrderDto dto)
         {
-            var id = await _createOrder.ExecuteAsync(dto);
+
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var id = await _createOrder.ExecuteAsync(dto, userId);
             return Ok();
             //return CreatedAtAction(nameof(Get), new { id }, null);
         }

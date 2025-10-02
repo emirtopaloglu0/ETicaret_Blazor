@@ -26,13 +26,13 @@ namespace ETicaret_Application.UseCases
             _currentUser = currentUser;
         }
 
-        public async Task<int> ExecuteAsync(CreateOrderDto dto)
+        public async Task<int> ExecuteAsync(CreateOrderDto dto, int userId)
         {
             //if (_currentUser.UserId == null) throw new UnauthorizedAccessException();
 
             var order = new ETicaret_Core.Entities.Order
             {
-                UserId = /*_currentUser.UserId.Value*/ 1,
+                UserId = userId,
                 OrderDate = DateTime.UtcNow,
                 ShippingAddress = dto.ShippingAddress,
                 DeliveryCompanyId = dto.DelivererCompanyId
