@@ -76,7 +76,8 @@ public class AuthService : IAuthService
             LastName = user.LastName,
             Id = user.Id,
             Email = user.Email,
-            Role = user.Role
+            Role = user.Role,
+            Address = user.Address
         };
     }
     public async Task<bool> UpdateUserAsync(int id, string email, string FirstName, string LastName, string password, string role = "customer")

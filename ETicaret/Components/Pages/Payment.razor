@@ -133,7 +133,8 @@
     List<DeliveryCompanyViewModel> deliveryCompanies = new();
 
     int companyId = 0;
-    string address = "";
+    string? address = "";
+    LoggedUserViewModel? user;
 
     protected override async Task OnInitializedAsync()
     {
@@ -145,6 +146,9 @@
     {
         if (firstRender)
         {
+            user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
+            address = user.Address;
+            StateHasChanged();
             var response = await RequestManager.GetAsync<List<DeliveryCompanyViewModel>>(ApiSettings.GetCompanies);
             if (response != null)
             {

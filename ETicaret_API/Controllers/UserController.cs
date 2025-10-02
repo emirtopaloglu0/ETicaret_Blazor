@@ -37,7 +37,8 @@ namespace ETicaret_API.Controllers
                 user.Email,
                 user.FirstName,
                 user.LastName,
-                user.Role
+                user.Role,
+                user.Address
             });
         }
 
