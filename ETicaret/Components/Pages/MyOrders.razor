@@ -11,6 +11,30 @@
         <i class="bi bi-box-seam"></i> Siparişlerim
     </h3>
 
+    <!-- Filtre Butonları -->
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+        <button class="btn @(selectedStatus == null ? "btn-primary" : "btn-outline-primary")"
+                @onclick="() => FilterOrders(null)">
+            Tümü
+        </button>
+        <button class="btn @(selectedStatus == OrderStatus.Bekliyor ? "btn-primary" : "btn-outline-primary")"
+                @onclick="() => FilterOrders(OrderStatus.Bekliyor)">
+            Bekleyenler
+        </button>
+        <button class="btn @(selectedStatus == OrderStatus.Kargoda ? "btn-primary" : "btn-outline-primary")"
+                @onclick="() => FilterOrders(OrderStatus.Kargoda)">
+            Kargoda
+        </button>
+        <button class="btn @(selectedStatus == OrderStatus.Tamamlandi ? "btn-primary" : "btn-outline-primary")"
+                @onclick="() => FilterOrders(OrderStatus.Tamamlandi)">
+            Tamamlananlar
+        </button>
+        <button class="btn @(selectedStatus == OrderStatus.Iptal ? "btn-primary" : "btn-outline-primary")"
+                @onclick="() => FilterOrders(OrderStatus.Iptal)">
+            İptal
+        </button>
+    </div>
+
     @if (pagedOrders != null && pagedOrders.Any())
     {
         <div class="d-flex flex-column gap-4">
@@ -66,7 +90,6 @@
                                     @onclick="() => GoToDetail(order.Id)">
                                 <i class="bi bi-eye"></i> Detay
                             </button>
-                            @* <span class="text-muted small">#@order.Id</span> *@
                         </div>
                     </div>
                 </div>
@@ -99,19 +122,28 @@
     else
     {
         <div class="alert alert-info text-center shadow-sm rounded-3">
-            <i class="bi bi-info-circle"></i> Henüz bir siparişiniz bulunmamaktadır.
+            <i class="bi bi-info-circle"></i> Henüz sipariş bulunmamaktadır.
         </div>
     }
 </div>
 
 @code {
     List<OrderViewModel>? orders = new();
+    string? selectedStatus = null;
+
     int currentPage = 1;
     int pageSize = 6;
-    int totalPages => (int)Math.Ceiling((decimal)(orders?.Count ?? 0) / pageSize);
+
+    IEnumerable<OrderViewModel> FilteredOrders =>
+    string.IsNullOrEmpty(selectedStatus)
+        ? (orders ?? Enumerable.Empty<OrderViewModel>())
+        : (orders?.Where(o => o.Status == selectedStatus) ?? Enumerable.Empty<OrderViewModel>());
+
+
+    int totalPages => (int)Math.Ceiling((decimal)(FilteredOrders.Count()) / pageSize);
 
     IEnumerable<OrderViewModel> pagedOrders =>
-        orders?.Skip((currentPage - 1) * pageSize).Take(pageSize) ?? Enumerable.Empty<OrderViewModel>();
+        FilteredOrders.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -125,9 +157,13 @@
     void ChangePage(int page)
     {
         if (page >= 1 && page <= totalPages)
-        {
             currentPage = page;
-        }
+    }
+
+    void FilterOrders(string? status)
+    {
+        selectedStatus = status;
+        currentPage = 1;
     }
 
     void GoToDetail(int id)
