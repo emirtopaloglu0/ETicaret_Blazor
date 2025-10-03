@@ -200,7 +200,14 @@
                 Items = orderItems
             };
 
-            await RequestManager.PostAsync<object, object>(ApiSettings.CompleteOrder, payload);
+            var response = await RequestManager.PostAsync<object, int>(ApiSettings.CompleteOrder, payload);
+
+            if (response <= 0)
+            {
+                ToastService.ShowError("Beklenmeyen Bir Hata Oluştu");
+                await Task.Delay(1500);
+                return;
+            }
 
             ToastService.ShowSuccess("Sipariş Başarıyla Oluşturuldu");
             CartService.Clear();

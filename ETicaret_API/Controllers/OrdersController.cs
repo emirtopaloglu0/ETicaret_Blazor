@@ -33,7 +33,7 @@ namespace ETicaret_API.Controllers
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var id = await _createOrder.ExecuteAsync(dto, userId);
-            return Ok();
+            return Ok(id);
             //return CreatedAtAction(nameof(Get), new { id }, null);
         }
 
