@@ -92,10 +92,11 @@
         {
             await AuthProvider.GetAuthenticationStateAsync();
 
-
             var user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
             if (user != null)
             {
+
+
                 ApiSettings.userId = user.Id.ToString();
                 if (user.Role == UserRoleEnums.ShopUser)
                 {
@@ -118,6 +119,8 @@
                 StateHasChanged();
                 ApiSettings.userId = "";
             }
+            await CartService.InitializeAsync(user?.Id.ToString());
+
 
         }
     }

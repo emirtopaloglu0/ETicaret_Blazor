@@ -1,6 +1,5 @@
 ﻿@using ETicaret_UI.Services
 @using ETicaret_UI.ViewModals
-@inject CartService CartService
 @implements IDisposable
 
 <div class="dropdown ms-4">
@@ -66,17 +65,17 @@
         CartService.OnChange -= StateHasChanged;
     }
 
-    void UpdateQuantity(int productId, int quantity)
+    async Task UpdateQuantity(int productId, int quantity)
     {
-        CartService.UpdateQuantity(productId, quantity);
+        await CartService.UpdateQuantity(productId, quantity);
     }
 
-    void RemoveItem(int productId)
+    async Task RemoveItem(int productId)
     {
-        CartService.RemoveFromCart(productId);
+        await CartService.RemoveFromCart(productId);
     }
-    void ClearCart()
+    async Task ClearCart()
     {
-        CartService.Clear();
+        await CartService.Clear();
     }
 }

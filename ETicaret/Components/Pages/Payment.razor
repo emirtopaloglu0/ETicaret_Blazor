@@ -162,9 +162,9 @@
         CartService.OnChange -= StateHasChanged;
     }
 
-    void UpdateQuantity(int productId, int quantity)
+    async Task UpdateQuantity(int productId, int quantity)
     {
-        CartService.UpdateQuantity(productId, quantity);
+        await CartService.UpdateQuantity(productId, quantity);
     }
 
     async Task CompeleteOrder()
@@ -210,7 +210,7 @@
             }
 
             ToastService.ShowSuccess("Sipariş Başarıyla Oluşturuldu");
-            CartService.Clear();
+            await CartService.Clear();
             await Task.Delay(1500);
             navigationManager.NavigateTo("/");
         }
