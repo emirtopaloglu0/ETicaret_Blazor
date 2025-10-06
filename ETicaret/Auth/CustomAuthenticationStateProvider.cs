@@ -27,6 +27,20 @@ namespace ETicaret_UI.Auth
                 var claims = JwtParser.ParseClaimsFromJwt(token);
                 var identity = new ClaimsIdentity(claims, "jwt");
 
+                // Token süresini kontrol et
+                var expClaim = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
+                if (expClaim != null && long.TryParse(expClaim, out long expSeconds))
+                {
+                    var expDate = DateTimeOffset.FromUnixTimeSeconds(expSeconds).UtcDateTime;
+
+                    if (expDate < DateTime.UtcNow)
+                    {
+                        // Token süresi dolmuş, kullanıcıyı logout et
+                        await MarkUserAsLoggedOut();
+                        return new AuthenticationState(_anonymous);
+                    }
+                }
+
                 return new AuthenticationState(new ClaimsPrincipal(identity));
             }
             catch
