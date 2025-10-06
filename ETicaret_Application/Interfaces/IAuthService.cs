@@ -13,7 +13,7 @@ namespace ETicaret_Application.Interfaces
         Task<string> LoginAsync(string email, string password);
         Task RegisterAsync(string email, string FirstName, string LastName, string password, string role = "customer");
         Task<LoggedUserDto> GetLoggedUser(int id);
-        Task<bool> UpdateUserAsync(int id, string email, string FirstName, string LastName, string password, string role = "customer");
+        Task<bool> UpdateUserAsync(int id, string email, string FirstName, string LastName, string password, string address, string phoneNumber, string role = "customer");
         Task ChangeUserRole(int id, string role, int companyId = 0, int shopId = 0);
         Task<bool> CheckByMail(string mail);
         Task<bool> IsPasswordRight(string password, int userId);

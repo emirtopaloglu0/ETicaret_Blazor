@@ -39,8 +39,16 @@
                                     <input class="form-control" @bind="user.Email" type="email" disabled />
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Eski Şifre</label>
-                                    <input class="form-control" @bind="oldPassword" type="password" placeholder="Eski şifrenizi girin" />
+                                    <label class="form-label fw-bold">Addres</label>
+                                    <textarea class="form-control" @bind="user.Address" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Telefon</label>
+                                    <input maxlength="11" type="tel" class="form-control" @bind="user.PhoneNumber" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Aktif Şifre</label>
+                                    <input class="form-control" @bind="oldPassword" type="password" placeholder="Şu anki şifrenizi girin" />
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Yeni Şifre</label>
@@ -112,11 +120,24 @@
         {
             ApiSettings.userId = user.Id.ToString();
             ApiSettings.password = oldPassword;
-            var response = await RequestManager.GetAsync<bool>(ApiSettings.IsPasswordRight);
-
-            if (!response)
+            if (!string.IsNullOrEmpty(oldPassword))
             {
-                ToastService.ShowError("Bir hata oluştu, lütfen tekrar deneyin.");
+                var response = await RequestManager.GetAsync<bool>(ApiSettings.IsPasswordRight);
+
+                if (!response)
+                {
+                    ToastService.ShowError("Şifrenizi yanlış girdiniz veya boş bıraktınız.");
+                    return;
+                }
+            }
+            if (string.IsNullOrEmpty(oldPassword))
+            {
+                ToastService.ShowError("Güncelleme işlemi için şifrenizi giriniz.");
+                return;
+            }
+            if (string.IsNullOrEmpty(user.FirstName) || string.IsNullOrEmpty(user.LastName))
+            {
+                ToastService.ShowError("Ad veya soyadınız boş olamaz");
                 return;
             }
 
@@ -125,10 +146,18 @@
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Password = newPassword
+                Password = (string.IsNullOrEmpty(newPassword)) ? oldPassword : newPassword,
+                Address = user.Address,
+                PhoneNumber = user.PhoneNumber
             };
 
-            await RequestManager.PutAsync<object, object>(ApiSettings.UpdateUser, payload);
+            var response2 = await RequestManager.PutAsync<object, bool>(ApiSettings.UpdateUser, payload);
+
+            if (!response2)
+            {
+                ToastService.ShowError("Güncelleme işlemi başarısız oldu. Bilgilerinizi kontrol ediniz.");
+                return;
+            }
 
             ToastService.ShowSuccess("Profiliniz başarıyla güncellendi!");
             await Task.Delay(1700);

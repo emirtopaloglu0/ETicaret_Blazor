@@ -77,10 +77,12 @@ public class AuthService : IAuthService
             Id = user.Id,
             Email = user.Email,
             Role = user.Role,
-            Address = user.Address
+            Address = user.Address,
+            PhoneNumber = user.PhoneNumber
         };
     }
-    public async Task<bool> UpdateUserAsync(int id, string email, string FirstName, string LastName, string password, string role = "customer")
+    public async Task<bool> UpdateUserAsync(int id, string email,
+        string FirstName, string LastName, string password, string address, string phoneNumber, string role = "customer")
     {
         try
         {
@@ -89,6 +91,8 @@ public class AuthService : IAuthService
             user.FirstName = FirstName;
             user.LastName = LastName;
             user.Password = BCrypt.Net.BCrypt.HashPassword(password);
+            user.Address = address;
+            user.PhoneNumber = phoneNumber;
             user.Role = role;
             await _context.SaveChangesAsync();
             return true;

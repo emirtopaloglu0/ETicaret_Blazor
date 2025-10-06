@@ -78,15 +78,31 @@ namespace ETicaret_UI.Services
 
             return JsonSerializer.Deserialize<TResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
-        public async Task PutAsync<TRequest, TResponse>(string endpoint, TRequest data)
+        public async Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest data)
         {
             await AddTokenAsync();
             var jsonContent = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
             var response = await _httpClient.PutAsync(endpoint, jsonContent);
             //if (!response.IsSuccessStatusCode) return default;
-            response.EnsureSuccessStatusCode();
+            //response.EnsureSuccessStatusCode();
             //var json = await response.Content.ReadAsStringAsync();
             //return JsonSerializer.Deserialize(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (!response.IsSuccessStatusCode) return default;
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            // Eğer response tipi string ise JSON parse etme
+            if (typeof(TResponse) == typeof(string))
+            {
+                return (TResponse)(object)json;
+            }
+
+            if (string.IsNullOrWhiteSpace(json))
+                return default;
+
+
+            return JsonSerializer.Deserialize<TResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
         public async Task DeleteAsync(string endpoint)

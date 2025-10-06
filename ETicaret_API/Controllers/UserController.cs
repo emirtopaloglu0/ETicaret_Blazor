@@ -38,7 +38,8 @@ namespace ETicaret_API.Controllers
                 user.FirstName,
                 user.LastName,
                 user.Role,
-                user.Address
+                user.Address,
+                user.PhoneNumber
             });
         }
 
@@ -78,9 +79,9 @@ namespace ETicaret_API.Controllers
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var user = await _authService.UpdateUserAsync
-                (userId, request.Email, request.FirstName, request.LastName, request.Password);
+                (userId, request.Email, request.FirstName, request.LastName, request.Password, request.Address, request.PhoneNumber);
 
-            return Ok();
+            return Ok(user);
         }
 
         [Authorize(Roles = UserRoleEnums.Admin)]
@@ -91,7 +92,7 @@ namespace ETicaret_API.Controllers
             return Ok();
         }
     }
-    public record UpdateUserRequest(string Email, string FirstName, string LastName, string Password);
+    public record UpdateUserRequest(string Email, string FirstName, string LastName, string Password, string Address, string PhoneNumber);
     public record ChangeRole(string role, int companyId = 0, int shopId = 0);
 
 }
