@@ -19,16 +19,22 @@
 
     <h2 class="mb-4 text-center fw-bold">🛒 @shop.Name Mağazasının Ürünleri</h2>
     <h4 class="mb-4 text-center text-muted">🛒 @shop.Description </h4>
+
     @if (canManageProducts)
     {
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="fw-bold">Ürün Listesi</h5>
+            <div class="d-flex align-items-center gap-3">
+                <h5 class="fw-bold">Ürün Listesi</h5>
+                <button class="btn btn-outline-secondary btn-sm" @onclick="OpenEditDescriptionModal">
+                    <i class="bi bi-pencil-square"></i> Mağaza Açıklamasını Düzenle
+                </button>
+            </div>
+
             <button class="btn btn-success btn-sm" @onclick="OpenAddModal">
                 <i class="bi bi-plus-circle"></i> Yeni Ürün
             </button>
         </div>
     }
-
 
     @if (products?.Any() == true)
     {
@@ -129,7 +135,7 @@
                         </div>
                         <div class="col-md-12">
                             <label class="form-label">Açıklama</label>
-                            <textarea class="form-control" @bind="productForm.Description"></textarea>
+                            <textarea class="form-control" @bind="productForm.Description">-</textarea>
                             @if (modalMode != "add")
                             {
                                 <button class="btn btn-outline-info mt-2" @onclick="() => GenerateDesc(productForm.Id)">Açıklama Oluştur</button>
@@ -197,6 +203,27 @@
     </div>
 </div>
 
+<!-- Mağaza Açıklaması Düzenleme Modal -->
+<div class="modal fade @(showDescModal ? "show d-block" : "")" tabindex="-1" style="background: rgba(0,0,0,.5);">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mağaza Açıklamasını Düzenle</h5>
+                <button type="button" class="btn-close" @onclick="CloseDescModal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Açıklama</label>
+                <textarea class="form-control" rows="5" @bind="shop.Description"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseDescModal">Kapat</button>
+                <button class="btn btn-primary" @onclick="UpdateShopDescription">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @code {
     [Parameter] public string id { get; set; }
 
@@ -208,6 +235,7 @@
     bool showModal = false;
     string modalMode = "";
     string modalTitle = "";
+    bool showDescModal = false;
     ProductViewModel? selectedProduct;
     ProductViewModel productForm = new();
     ShopUserViewModal? shopUser = new();
@@ -255,7 +283,6 @@
 
             var http = new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
             availableImages = await http.GetFromJsonAsync<List<string>>("uploads/list") ?? new();
-
             StateHasChanged();
         }
     }
@@ -377,7 +404,6 @@
         {
             ToastService.ShowError("Beklenmeyen Bir Hata Oluştu");
         }
-
     }
     void ChangePage(int page)
     {
@@ -426,6 +452,51 @@
         }
         productForm.Description = response;
     }
+
+    void OpenEditDescriptionModal()
+    {
+        showDescModal = true;
+    }
+
+    async Task CloseDescModal()
+    {
+        showDescModal = false;
+        // Mağazayı tekrar getir (güncel halini görmek için)
+        ApiSettings.shopId = Convert.ToInt32(id);
+        shop = await RequestManager.GetAsync<ShopViewModal>(ApiSettings.GetShopById);
+        ApiSettings.shopId = 0;
+        StateHasChanged();
+    }
+
+    async Task UpdateShopDescription()
+    {
+        try
+        {
+            var payload = new
+            {
+                Name = shop.Name,
+                Description = shop.Description
+            };
+
+            ApiSettings.shopId = Convert.ToInt32(id);
+            var response = await RequestManager.PutAsync<object, bool>(ApiSettings.UpdateShop, payload);
+            ApiSettings.shopId = 0;
+            if (!response)
+            {
+                ToastService.ShowError("Beklenmeyen bir hata oluştu, daha sonra tekrar deneyin");
+                return;
+            }
+
+            ToastService.ShowSuccess("Mağaza açıklaması güncellendi");
+            await CloseDescModal();
+        }
+        catch
+        {
+            ToastService.ShowError("Açıklama güncellenirken hata oluştu");
+        }
+    }
+
+
 
 
 }

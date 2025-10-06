@@ -32,6 +32,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
                     Description = product.Description,
                     Stock = product.Stock,
                     Price = product.Price,
+                    ImageUrl = product.ImageUrl,
                 };
                 await _context.Products.AddAsync(productEntity);
                 await _context.SaveChangesAsync();

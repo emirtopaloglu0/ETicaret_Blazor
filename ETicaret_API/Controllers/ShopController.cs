@@ -76,7 +76,7 @@ namespace ETicaret_API.Controllers
                 Description = postRequest.Description
             };
             await _shopRepository.UpdateAsync(id, shop);
-            return Ok();
+            return Ok(true);
         }
 
         [Authorize(Roles = UserRoleEnums.Admin)]
