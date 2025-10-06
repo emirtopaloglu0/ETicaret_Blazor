@@ -90,9 +90,10 @@
     {
         if (firstRender)
         {
-            var authTest = AuthProvider.GetAuthenticationStateAsync();
-            var user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
+            await AuthProvider.GetAuthenticationStateAsync();
 
+
+            var user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
             if (user != null)
             {
                 ApiSettings.userId = user.Id.ToString();

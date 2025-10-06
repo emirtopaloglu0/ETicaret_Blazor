@@ -29,6 +29,11 @@
                         <button class="btn btn-sm btn-outline-secondary mb-1" @onclick="() => UpdateQuantity(it.Product.Id, it.Quantity + 1)">+</button>
                         <button class="btn btn-sm btn-outline-secondary" @onclick="() => UpdateQuantity(it.Product.Id, it.Quantity - 1)">-</button>
                     </div>
+                    <div class="ms-2 d-flex flex-column">
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveItem(it.Product.Id)">
+                            X
+                        </button>
+                    </div>
                 </div>
             }
 
@@ -41,6 +46,9 @@
 
             <div class="mt-2">
                 <a class="btn btn-primary w-100" href="payment">Ödeme / Sepete Git</a>
+            </div>
+            <div class="mt-2">
+                <button class="btn btn-danger w-100" @onclick="() => ClearCart()">Sepeti Temizle</button>
             </div>
         }
     </div>
@@ -61,5 +69,14 @@
     void UpdateQuantity(int productId, int quantity)
     {
         CartService.UpdateQuantity(productId, quantity);
+    }
+
+    void RemoveItem(int productId)
+    {
+        CartService.RemoveFromCart(productId);
+    }
+    void ClearCart()
+    {
+        CartService.Clear();
     }
 }

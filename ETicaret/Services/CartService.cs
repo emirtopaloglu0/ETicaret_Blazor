@@ -7,7 +7,6 @@ namespace ETicaret_UI.Services
 {
     public class CartService
     {
-        // Basit CartItem - UI'da kullanmak için product referansı saklıyoruz
         public class CartItem
         {
             public ProductViewModel Product { get; set; } = null!;
