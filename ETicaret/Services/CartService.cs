@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using ETicaret_UI.ViewModals;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Text.Json;
 
 
@@ -16,6 +17,7 @@ namespace ETicaret_UI.Services
         string userId = string.Empty;
 
         private readonly ILocalStorageService _localStorage;
+        private readonly ProtectedSessionStorage _protectedSessionStorage;
         //private const string CartStorageKey = "user_cart";
 
         private readonly List<CartItem> _items = new();
@@ -23,9 +25,10 @@ namespace ETicaret_UI.Services
 
         public event Action? OnChange;
 
-        public CartService(ILocalStorageService localStorage)
+        public CartService(ILocalStorageService localStorage, ProtectedSessionStorage protectedSessionStorage)
         {
             _localStorage = localStorage;
+            _protectedSessionStorage = protectedSessionStorage;
         }
 
         public int TotalCount => _items.Sum(i => i.Quantity);

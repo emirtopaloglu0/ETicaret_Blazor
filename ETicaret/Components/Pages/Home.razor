@@ -17,7 +17,6 @@
                     SuccessIcon="fa fa-thumbs-up"
                     ErrorIcon="fa fa-bug" />
 
-    <!-- 🔎 Filtreleme Alanı -->
     <div class="row mb-4 align-items-center">
         <div class="col-md-3 col-sm-12 mb-2">
             <select class="form-select" @bind="selectedCategory">
@@ -29,7 +28,6 @@
             </select>
         </div>
 
-        <!-- 🏪 Mağaza Filtreleme -->
         <div class="col-md-3 col-sm-12 mb-2">
             <select class="form-select" @bind="selectedShop">
                 <option value="">Tüm Mağazalar</option>
@@ -52,7 +50,6 @@
         </div>
     </div>
 
-    <!-- 🧱 Ürün Listesi -->
     <div class="row g-4">
         @foreach (var item in pagedProducts)
         {
@@ -89,7 +86,6 @@
         }
     </div>
 
-    <!-- 📄 Sayfalama -->
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center mt-4">
             <li class="page-item @(currentPage == 1 ? "disabled" : "")">

@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using ETicaret_UI.Settings;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Net.Http.Headers;
 using System.Security.AccessControl;
 using System.Text;
@@ -13,23 +14,26 @@ namespace ETicaret_UI.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ApiSettings _apiSettings;
         private readonly ILocalStorageService _localStorage;
+        private readonly ProtectedSessionStorage _protectedSessionStorage;
+
 
         public RequestManager(HttpClient httpClient,
-            IHttpContextAccessor httpContextAccessor, ApiSettings apiSettings, ILocalStorageService localStorage)
+            IHttpContextAccessor httpContextAccessor, ApiSettings apiSettings, ILocalStorageService localStorage, ProtectedSessionStorage protectedSessionStorage)
         {
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
             _apiSettings = apiSettings;
             _localStorage = localStorage;
+            _protectedSessionStorage = protectedSessionStorage;
         }
 
         private async Task AddTokenAsync()
         {
-            var token = await _localStorage.GetItemAsync<string>("authToken");
-            if (!string.IsNullOrWhiteSpace(token))
+            var token = await _protectedSessionStorage.GetAsync<string>("authToken");
+            if (!string.IsNullOrWhiteSpace(token.Value))
             {
                 _httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token);
+                    new AuthenticationHeaderValue("Bearer", token.Value);
             }
             else
             {
