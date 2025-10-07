@@ -1,5 +1,5 @@
 ﻿@page "/orderDetail"
-@page "/orderDetail/{id}"
+@page "/orderDetail/{encodedId}"
 @using ETicaret_UI.ViewModals
 @rendermode InteractiveServer
 @attribute [StreamRendering]
@@ -105,6 +105,12 @@
                         <i class="bi bi-x-circle"></i> İptal Et
                     </button>
                 }
+                @if (orderWithItems.Status == OrderStatus.Tamamlandi)
+                {
+                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#refundModal">
+                        <i class="bi bi-x-circle"></i> İade Et
+                    </button>
+                }
                 <div></div>
                 <button class="btn btn-outline-primary" @onclick="GoBack">
                     <i class="bi bi-arrow-left"></i> Geri
@@ -141,15 +147,37 @@
     </div>
 </div>
 
+<!-- Refund Modal -->
+<div class="modal fade" id="refundModal" tabindex="-1" aria-labelledby="refundModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="refundModalLabel"><i class="bi bi-exclamation-triangle"></i> Sipariş İptali</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                İade etmek istediğinize Emin Misiniz?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmRefundOrder" data-bs-dismiss="modal">Evet, İade Et</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @code {
-    [Parameter] public string id { get; set; }
+    [Parameter] public string encodedId { get; set; }
     GetOrderWithItemsViewModel? orderWithItems;
     List<OrderItemViewModel> orderItem = new();
+    int id;
+    List<int> refundProductIds = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            id = MaskService.Decode(encodedId);
             ApiSettings.orderId = Convert.ToInt32(id);
             orderWithItems = await RequestManager.GetAsync<GetOrderWithItemsViewModel>(ApiSettings.GetOrderWithItems);
             ApiSettings.orderId = 0;
@@ -196,4 +224,30 @@
             ToastService.ShowError("Beklenmedik Bir Hata Oluştu");
         }
     }
+
+    async Task ConfirmRefundOrder()
+    {
+        try
+        {
+            ApiSettings.orderId = Convert.ToInt32(id);
+            await RequestManager.PutAsync<string, object>(ApiSettings.UpdateOrderStatus, OrderStatus.IadeTalepEdildi);
+            ApiSettings.orderId = 0;
+            ToastService.ShowSuccess("İade Talebiniz Oluşturuldu");
+            await Task.Delay(1500);
+            navigationManager.NavigateTo("/myOrders");
+        }
+        catch
+        {
+            ToastService.ShowError("Beklenmedik Bir Hata Oluştu");
+        }
+    }
+    // void AddProductIdList(int productId)
+    // {
+    //     if (refundProductIds.Contains(productId))
+    //     {
+    //         refundProductIds.Remove(productId);
+    //         return;
+    //     }
+    //     refundProductIds.Add(productId);
+    // }
 }

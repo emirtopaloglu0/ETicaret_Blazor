@@ -63,11 +63,9 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        [Authorize(Roles = $"{UserRoleEnums.Deliverer},{UserRoleEnums.Admin},{UserRoleEnums.Customer}")]
         [HttpPut("updateCargo/{id}")]
         public async Task<ActionResult> UpdateStatus(int id, [FromBody] string status)
         {
-            //Kargocular comboboxtan seçerek yapar burayı.
             await _orderRepository.UpdateCargoStatus(id, status);
             return Ok();
         }
@@ -78,5 +76,15 @@ namespace ETicaret_API.Controllers
             var response = await _orderRepository.GetByCompanyId(id);
             return Ok(response);
         }
+
+        [HttpGet("refund-requests/{shopId}")]
+        public async Task<ActionResult<IEnumerable<List<GetOrderDto>>>> GetRefundRequestOrders(int shopId)
+        {
+            var response = await _orderRepository.GetRefundRequestOrders(shopId);
+            return Ok(response);
+        }
+
+        // iade talebi mağazanın önüne gelecek. Eğer mağaza onaylarsa iade kabul edilecek. Bunun için ayrı tablo gerekebilir. 
+        // Bu talep sadece durumu tamamlanmış olanlar için geçerlidir.
     }
 }

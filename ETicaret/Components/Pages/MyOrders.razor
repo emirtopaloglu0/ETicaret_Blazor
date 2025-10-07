@@ -13,26 +13,13 @@
 
     <!-- Filtre Butonları -->
     <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
-        <button class="btn @(selectedStatus == null ? "btn-primary" : "btn-outline-primary")"
-                @onclick="() => FilterOrders(null)">
-            Tümü
-        </button>
-        <button class="btn @(selectedStatus == OrderStatus.Bekliyor ? "btn-primary" : "btn-outline-primary")"
-                @onclick="() => FilterOrders(OrderStatus.Bekliyor)">
-            Bekleyenler
-        </button>
-        <button class="btn @(selectedStatus == OrderStatus.Kargoda ? "btn-primary" : "btn-outline-primary")"
-                @onclick="() => FilterOrders(OrderStatus.Kargoda)">
-            Kargoda
-        </button>
-        <button class="btn @(selectedStatus == OrderStatus.Tamamlandi ? "btn-primary" : "btn-outline-primary")"
-                @onclick="() => FilterOrders(OrderStatus.Tamamlandi)">
-            Tamamlananlar
-        </button>
-        <button class="btn @(selectedStatus == OrderStatus.Iptal ? "btn-primary" : "btn-outline-primary")"
-                @onclick="() => FilterOrders(OrderStatus.Iptal)">
-            İptal
-        </button>
+        @foreach (var status in statusFilters)
+        {
+            <button class="btn @(selectedStatus == status.Value ? "btn-primary" : "btn-outline-primary")"
+                    @onclick="() => FilterOrders(status.Value)">
+                @status.Key
+            </button>
+        }
     </div>
 
     @if (pagedOrders != null && pagedOrders.Any())
@@ -134,6 +121,17 @@
     int currentPage = 1;
     int pageSize = 6;
 
+    //enums klasörünün içinde genel bir filtre olarak yapılmalı
+    Dictionary<string, string?> statusFilters = new()
+    {
+        { "Tümü", null },
+        { "Bekleyenler", OrderStatus.Bekliyor },
+        { "Kargoda Olanlar", OrderStatus.Kargoda },
+        { "Tamamlananlar", OrderStatus.Tamamlandi },
+        { "İptal Edilenler", OrderStatus.Iptal },
+        {"İadeler", OrderStatus.IadeOnaylandı}
+    };
+
     IEnumerable<OrderViewModel> FilteredOrders =>
     string.IsNullOrEmpty(selectedStatus)
         ? (orders ?? Enumerable.Empty<OrderViewModel>())
@@ -168,7 +166,8 @@
 
     void GoToDetail(int id)
     {
-        NavigationManager.NavigateTo($"/orderDetail/{id}");
+        var encodedId = MaskService.Encode(id);
+        NavigationManager.NavigateTo($"/orderDetail/{encodedId}");
     }
 
     string GetStatusBadge(string status)

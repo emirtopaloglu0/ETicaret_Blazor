@@ -150,13 +150,15 @@
     int targetOrderId;
     string targetStatus;
 
+    //enums klasörünün içinde genel bir filtre olarak yapılmalı
     Dictionary<string, string?> statusFilters = new()
     {
         { "Tümü", null },
         { "Bekleyenler", OrderStatus.Bekliyor },
         { "Kargoda Olanlar", OrderStatus.Kargoda },
         { "Tamamlananlar", OrderStatus.Tamamlandi },
-        { "İptal Edilenler", OrderStatus.Iptal }
+        { "İptal Edilenler", OrderStatus.Iptal },
+        {"İadeler", OrderStatus.IadeOnaylandı}
     };
 
     IEnumerable<GetOrderViewModel> FilteredOrders =>

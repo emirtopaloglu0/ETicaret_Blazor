@@ -129,7 +129,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
             {
                 order.DeliveryDate = DateTime.Now;
             }
-            if (status == OrderStatus.Iptal)
+            if (status == OrderStatus.Iptal || status == OrderStatus.IadeOnaylandı)
             {
                 var _orderItems = await _context.OrderItems.Where(x => x.OrderId == order.Id).ToListAsync();
                 foreach (var item in _orderItems)
@@ -162,6 +162,37 @@ namespace ETicaret_Infrastructure.Data.Repositories
                     CompanyName = order.DeliveryCompany.Name,
                     CompanyId = order.DeliveryCompanyId
                 });
+            }
+            return result;
+        }
+        public async Task<List<GetOrderDto>> GetRefundRequestOrders(int shopId)
+        {
+            var orders = await _context.Orders.Include(x => x.OrderItems).ThenInclude(x => x.Product).ThenInclude(x => x.Shop)
+                .Include(x => x.DeliveryCompany)
+                .Where(x => x.Status == OrderStatus.IadeTalepEdildi).ToListAsync();
+
+            List<GetOrderDto> result = new List<GetOrderDto>();
+            foreach (var order in orders)
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    if (item.Product.ShopId == shopId && !result.Any(x => x.Id == order.Id))
+                    {
+                        result.Add(new GetOrderDto
+                        {
+                            Id = order.Id,
+                            OrderDate = order.OrderDate,
+                            DeliveryDate = order.DeliveryDate,
+                            ShippingAddress = order.ShippingAddress,
+                            TotalAmount = order.TotalAmount,
+                            Status = order.Status,
+                            CompanyName = order.DeliveryCompany.Name,
+                            CompanyId = order.DeliveryCompanyId
+                        });
+                        break;
+                    }
+
+                }
             }
             return result;
         }
