@@ -1,5 +1,5 @@
 ﻿@page "/shop"
-@page "/shop/{id}"
+@page "/shop/{protectedShopId}"
 @using ETicaret_UI.Services
 @using ETicaret_UI.ViewModals
 @rendermode InteractiveServer
@@ -225,8 +225,9 @@
 
 
 @code {
-    [Parameter] public string id { get; set; }
+    [Parameter] public string protectedShopId { get; set; }
 
+    int shopId;
     List<ProductViewModel> products = new();
     List<string> availableImages = new();
     bool canManageProducts = false;
@@ -257,6 +258,7 @@
     {
         if (firstRender)
         {
+            shopId = MaskService.Decode(protectedShopId);
             user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
             if (user != null)
             {
@@ -265,7 +267,7 @@
                 shopUser = await RequestManager.GetAsync<ShopUserViewModal>(ApiSettings.GetShopByUserId);
                 ApiSettings.userId = "";
 
-                if (shopUser != null && (shopUser.ShopId == Convert.ToInt32(id) && shopUser.UserId == user.Id))
+                if (shopUser != null && (shopUser.ShopId == Convert.ToInt32(shopId) && shopUser.UserId == user.Id))
                 {
                     canManageProducts = true;
                 }
@@ -275,7 +277,10 @@
                 }
             }
 
-            ApiSettings.shopId = Convert.ToInt32(id);
+
+
+            ApiSettings.shopId = shopId;
+
             shop = await RequestManager.GetAsync<ShopViewModal>(ApiSettings.GetShopById);
             products = await RequestManager.GetAsync<List<ProductViewModel>>(ApiSettings.GetProductsByShopId);
             ApiSettings.shopId = 0;
@@ -339,7 +344,7 @@
             var payload = new
             {
                 CategoryId = productForm.CategoryId,
-                ShopId = id,
+                ShopId = shopId,
                 Name = productForm.Name,
                 Description = productForm.Description,
                 Stock = productForm.Stock,
@@ -366,7 +371,7 @@
             var payload = new
             {
                 CategoryId = productForm.CategoryId,
-                ShopId = id,
+                ShopId = shopId,
                 Name = productForm.Name,
                 Description = productForm.Description,
                 Stock = productForm.Stock,
@@ -462,7 +467,7 @@
     {
         showDescModal = false;
         // Mağazayı tekrar getir (güncel halini görmek için)
-        ApiSettings.shopId = Convert.ToInt32(id);
+        ApiSettings.shopId = Convert.ToInt32(shopId);
         shop = await RequestManager.GetAsync<ShopViewModal>(ApiSettings.GetShopById);
         ApiSettings.shopId = 0;
         StateHasChanged();
@@ -478,7 +483,7 @@
                 Description = shop.Description
             };
 
-            ApiSettings.shopId = Convert.ToInt32(id);
+            ApiSettings.shopId = Convert.ToInt32(shopId);
             var response = await RequestManager.PutAsync<object, bool>(ApiSettings.UpdateShop, payload);
             ApiSettings.shopId = 0;
             if (!response)

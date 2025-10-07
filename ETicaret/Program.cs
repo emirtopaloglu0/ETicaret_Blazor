@@ -64,6 +64,8 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddBlazoredToast();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddDataProtection();
+builder.Services.AddScoped<IdMaskService>();
 
 
 var app = builder.Build();

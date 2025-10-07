@@ -50,7 +50,7 @@
                 <AuthorizeView Roles="@UserRoleEnums.ShopUser">
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/shop/@shopId">Mağazam</a>
+                            <a class="nav-link text-white" href="/shop/@MaskService.Encode(shopId)">Mağazam</a>
                         </li>
                     </Authorized>
                 </AuthorizeView>
@@ -58,7 +58,7 @@
                 <AuthorizeView Roles="@UserRoleEnums.Deliverer">
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/deliveries/@deliveryCompanyId">Teslimatlar</a>
+                            <a class="nav-link text-white" href="/deliveries/@MaskService.Encode(deliveryCompanyId)">Teslimatlar</a>
                         </li>
                     </Authorized>
                 </AuthorizeView>

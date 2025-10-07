@@ -1,5 +1,5 @@
 ﻿@page "/deliveries"
-@page "/deliveries/{companyId}"
+@page "/deliveries/{maskedCompanyId}"
 @rendermode InteractiveServer
 @attribute [StreamRendering]
 
@@ -135,8 +135,9 @@
 </AuthorizeView>
 
 @code {
-    [Parameter] public string companyId { get; set; }
+    [Parameter] public string maskedCompanyId { get; set; }
 
+    int companyId;
     List<GetOrderViewModel> orders = new();
     string? selectedStatus = null;
 
@@ -170,6 +171,7 @@
     {
         if (firstRender)
         {
+            companyId = MaskService.Decode(maskedCompanyId);
             ApiSettings.companyId = Convert.ToInt32(companyId);
             orders = await RequestManager.GetAsync<List<GetOrderViewModel>>(ApiSettings.GetOrdersByCompanyId);
             StateHasChanged();
