@@ -78,7 +78,7 @@ namespace ETicaret_API.Controllers
         }
 
         [HttpGet("refund-requests/{shopId}")]
-        public async Task<ActionResult<IEnumerable<List<GetOrderDto>>>> GetRefundRequestOrders(int shopId)
+        public async Task<ActionResult<IEnumerable<List<GetOrderWithItemsDto>>>> GetRefundRequestOrders(int shopId)
         {
             var response = await _orderRepository.GetRefundRequestOrders(shopId);
             return Ok(response);

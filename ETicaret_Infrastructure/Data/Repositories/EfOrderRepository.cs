@@ -165,20 +165,34 @@ namespace ETicaret_Infrastructure.Data.Repositories
             }
             return result;
         }
-        public async Task<List<GetOrderDto>> GetRefundRequestOrders(int shopId)
+        public async Task<List<GetOrderWithItemsDto>> GetRefundRequestOrders(int shopId)
         {
             var orders = await _context.Orders.Include(x => x.OrderItems).ThenInclude(x => x.Product).ThenInclude(x => x.Shop)
                 .Include(x => x.DeliveryCompany)
                 .Where(x => x.Status == OrderStatus.IadeTalepEdildi).ToListAsync();
 
-            List<GetOrderDto> result = new List<GetOrderDto>();
+            List<GetOrderWithItemsDto> result = new List<GetOrderWithItemsDto>();
             foreach (var order in orders)
             {
+                List<OrderItemDTO> orderItemDTOs = order.OrderItems
+                    .Select(x => new OrderItemDTO(
+                            x.ProductId,
+                            x.Quantity,
+                            x.UnitPrice)
+                    {
+                        Id = x.Id,
+                        OrderId = x.OrderId,
+                        ProductName = x.Product.Name,
+                        ProductURL = x.Product.ImageUrl 
+                    })
+                    .ToList();
+
+
                 foreach (var item in order.OrderItems)
                 {
                     if (item.Product.ShopId == shopId && !result.Any(x => x.Id == order.Id))
                     {
-                        result.Add(new GetOrderDto
+                        result.Add(new GetOrderWithItemsDto
                         {
                             Id = order.Id,
                             OrderDate = order.OrderDate,
@@ -187,13 +201,15 @@ namespace ETicaret_Infrastructure.Data.Repositories
                             TotalAmount = order.TotalAmount,
                             Status = order.Status,
                             CompanyName = order.DeliveryCompany.Name,
-                            CompanyId = order.DeliveryCompanyId
+                            CompanyId = order.DeliveryCompanyId,
+                            Items = orderItemDTOs
                         });
                         break;
                     }
 
                 }
             }
+
             return result;
         }
     }

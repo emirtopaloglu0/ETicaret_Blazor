@@ -3,17 +3,21 @@
 @rendermode InteractiveServer
 @attribute [StreamRendering]
 
+<PageTitle>İade Talepleri</PageTitle>
 <AuthorizeView Roles="@UserRoleEnums.ShopUser">
     <Authorized>
-        <div class="container my-5">
-            <h3 class="mb-4 text-primary fw-bold">
-                <i class="bi bi-arrow-counterclockwise me-2"></i> İade Talepleri
-            </h3>
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold text-gradient">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i> İade Talepleri
+                </h2>
+            </div>
 
             @if (orders == null || orders.Count == 0)
             {
-                <div class="alert alert-info text-center shadow-sm rounded-3">
-                    <i class="bi bi-info-circle"></i> Şu anda bekleyen iade talebi bulunmamaktadır.
+                <div class="alert alert-info text-center shadow-sm rounded-4 p-4">
+                    <i class="bi bi-info-circle fs-4"></i>
+                    <div class="mt-2">Şu anda bekleyen iade talebi bulunmamaktadır.</div>
                 </div>
             }
             else
@@ -22,38 +26,50 @@
                     @foreach (var order in orders)
                     {
                         <div class="col-md-6 col-lg-4">
-                            <div class="card shadow-sm border-0 rounded-4 h-100">
+                            <div class="card order-card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span class="fw-semibold text-secondary">@order.OrderDate.ToString("dd MMM yyyy")</span>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-clock me-1"></i> Bekliyor
+                                    </span>
+                                </div>
+
                                 <div class="card-body d-flex flex-column">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h5 class="card-title mb-0 text-secondary fw-semibold">
-                                            Sipariş #@order.Id
-                                        </h5>
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-clock"></i> Bekliyor
-                                        </span>
-                                    </div>
-
-                                    <p class="card-text mb-2">
-                                        <i class="bi bi-calendar3"></i>
-                                        <strong>Tarih:</strong> @order.OrderDate.ToString("dd MMM yyyy")
-                                    </p>
-
-                                    <p class="card-text mb-2">
-                                        <i class="bi bi-currency-dollar"></i>
+                                    <div class="mb-3 small text-muted">
+                                        <i class="bi bi-cash"></i>
                                         <strong>Tutar:</strong> @order.TotalAmount.ToString("C")
-                                    </p>
+                                    </div>
 
-                                    
-                                    <div class="mt-auto d-flex justify-content-between">
-                                        <button class="btn btn-success w-100 me-2"
+                                    <div class="product-list border-top pt-2 mb-3">
+                                        @foreach (var item in order.Items)
+                                        {
+                                            <div class="d-flex align-items-center mb-2">
+                                                <img src="@item.ProductURL"
+                                                     class="rounded me-2 product-img"
+                                                     alt="@item.ProductName" />
+                                                <div>
+                                                    <div class="fw-semibold">@item.ProductName</div>
+                                                    <div class="text-muted small">Adet: @item.Quantity</div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="mt-auto d-flex gap-2">
+                                        <button class="btn btn-success flex-fill"
                                                 @onclick="() => ConfirmRefund(order.Id, OrderStatus.IadeOnaylandı)">
-                                            <i class="bi bi-check-circle"></i> Onayla
+                                            <i class="bi bi-check-circle me-1"></i> Onayla
                                         </button>
-                                        <button class="btn btn-outline-danger w-100"
+                                        <button class="btn btn-outline-danger flex-fill"
                                                 @onclick="() => ConfirmRefund(order.Id, OrderStatus.IadeReddedildi)">
-                                            <i class="bi bi-x-circle"></i> Reddet
+                                            <i class="bi bi-x-circle me-1"></i> Reddet
                                         </button>
                                     </div>
+                                </div>
+
+                                <div class="card-footer bg-light text-muted small text-center">
+                                    <i class="bi bi-truck"></i> @order.CompanyName
                                 </div>
                             </div>
                         </div>
@@ -62,20 +78,60 @@
             }
         </div>
     </Authorized>
+
     <NotAuthorized>
         <div class="text-center my-5">
-            <div class="alert alert-danger shadow-sm rounded-3">
-                <i class="bi bi-lock-fill"></i> Bu sayfayı görüntüleme yetkiniz bulunmamaktadır.
+            <div class="alert alert-danger shadow-sm rounded-4 p-4">
+                <i class="bi bi-lock-fill fs-4"></i>
+                <div class="mt-2">Bu sayfayı görüntüleme yetkiniz bulunmamaktadır.</div>
             </div>
         </div>
     </NotAuthorized>
 </AuthorizeView>
 
+<style>
+    .text-gradient {
+        background: linear-gradient(45deg, #007bff, #6610f2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .order-card {
+        transition: all 0.25s ease-in-out;
+    }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+    .product-img {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+    }
+
+    .product-list {
+        max-height: 120px;
+        overflow-y: auto;
+    }
+
+        .product-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .product-list::-webkit-scrollbar-thumb {
+            background: #bbb;
+            border-radius: 3px;
+        }
+</style>
+
 @code {
     [Parameter] public string encodedId { get; set; }
     int shopId;
 
-    List<GetOrderViewModel> orders = new();
+    List<GetOrderWithItemsViewModel> orders = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -84,7 +140,7 @@
             shopId = MaskService.Decode(encodedId);
             ApiSettings.shopId = shopId;
 
-            orders = await RequestManager.GetAsync<List<GetOrderViewModel>>(ApiSettings.GetRefundRequestOrders);
+            orders = await RequestManager.GetAsync<List<GetOrderWithItemsViewModel>>(ApiSettings.GetRefundRequestOrders);
             StateHasChanged();
         }
     }
@@ -94,12 +150,9 @@
         ApiSettings.orderId = orderId;
         await RequestManager.PutAsync<string, object>(ApiSettings.UpdateOrderStatus, status);
 
-        // UI'yı güncellemek için ilgili siparişi listeden çıkar
         var order = orders.FirstOrDefault(o => o.Id == orderId);
         if (order != null)
-        {
             orders.Remove(order);
-        }
 
         StateHasChanged();
     }
