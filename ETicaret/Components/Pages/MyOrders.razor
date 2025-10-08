@@ -1,4 +1,4 @@
-﻿@page "/myOrders"
+﻿@page "/siparislerim"
 @using ETicaret_UI.ViewModals
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
@@ -169,7 +169,7 @@
     void GoToDetail(int id)
     {
         var encodedId = MaskService.Encode(id);
-        NavigationManager.NavigateTo($"/orderDetail/{encodedId}");
+        NavigationManager.NavigateTo($"/siparis-detay/{encodedId}");
     }
 
     string GetStatusBadge(string status)

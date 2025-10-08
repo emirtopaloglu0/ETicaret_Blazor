@@ -73,7 +73,7 @@
         public string GetOrderWithItems => $"{BaseUrl}Orders/withItems/{orderId}";
         public string UpdateOrderStatus => $"{BaseUrl}Orders/updateCargo/{orderId}";
         public string GetOrdersByCompanyId => $"{BaseUrl}Orders/GetByCompanyId/{companyId}";
-        public string GetRefundRequestOrders => $"{BaseUrl}Orders/refund-requests/{shopId}";
+        public string GetRefundRequestOrders => $"{BaseUrl}Orders/iade-talepleri/{shopId}";
         public string GetOrdersWithItemsByShopId => $"{BaseUrl}Orders/with-items-by-shopId/{shopId}";
         #endregion
 

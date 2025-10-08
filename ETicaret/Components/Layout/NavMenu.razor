@@ -26,7 +26,7 @@
                 <AuthorizeView>
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="profile">Hesabım</a>
+                            <a class="nav-link text-white" href="hesap">Hesabım</a>
                         </li>
                     </Authorized>
                 </AuthorizeView>
@@ -34,7 +34,7 @@
                 <AuthorizeView Roles="@UserRoleEnums.Customer">
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="myOrders">Siparişlerim</a>
+                            <a class="nav-link text-white" href="siparislerim">Siparişlerim</a>
                         </li>
                     </Authorized>
                 </AuthorizeView>
@@ -50,13 +50,13 @@
                 <AuthorizeView Roles="@UserRoleEnums.ShopUser">
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/shop/@MaskService.Encode(shopId)">Mağazam</a>
+                            <a class="nav-link text-white" href="/magaza/@MaskService.Encode(shopId)">Mağazam</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/refund-requests/@MaskService.Encode(shopId)">İade Talepleri</a>
+                            <a class="nav-link text-white" href="/iade-talepleri/@MaskService.Encode(shopId)">İade Talepleri</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/shop-dashboard/@MaskService.Encode(shopId)">Kontrol Paneli</a>
+                            <a class="nav-link text-white" href="/magaza-kontrol-paneli/@MaskService.Encode(shopId)">Kontrol Paneli</a>
                         </li>
                     </Authorized>
                 </AuthorizeView>
@@ -64,7 +64,7 @@
                 <AuthorizeView Roles="@UserRoleEnums.Deliverer">
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/deliveries/@MaskService.Encode(deliveryCompanyId)">Teslimatlar</a>
+                            <a class="nav-link text-white" href="/teslimatlar/@MaskService.Encode(deliveryCompanyId)">Teslimatlar</a>
                         </li>
                     </Authorized>
                 </AuthorizeView>

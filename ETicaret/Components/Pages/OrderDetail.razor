@@ -1,5 +1,5 @@
-﻿@page "/orderDetail"
-@page "/orderDetail/{encodedId}"
+﻿@page "/siparis-detay"
+@page "/siparis-detay/{encodedId}"
 @using ETicaret_UI.ViewModals
 @rendermode InteractiveServer
 @attribute [StreamRendering]
@@ -177,18 +177,26 @@
     {
         if (firstRender)
         {
-            id = MaskService.Decode(encodedId);
-            ApiSettings.orderId = Convert.ToInt32(id);
-            orderWithItems = await RequestManager.GetAsync<GetOrderWithItemsViewModel>(ApiSettings.GetOrderWithItems);
-            ApiSettings.orderId = 0;
-            orderItem = orderWithItems?.Items ?? new List<OrderItemViewModel>();
-            StateHasChanged();
+            try
+            {
+                id = MaskService.Decode(encodedId);
+                ApiSettings.orderId = Convert.ToInt32(id);
+                orderWithItems = await RequestManager.GetAsync<GetOrderWithItemsViewModel>(ApiSettings.GetOrderWithItems);
+                ApiSettings.orderId = 0;
+                orderItem = orderWithItems?.Items ?? new List<OrderItemViewModel>();
+                StateHasChanged();
+            }
+            catch
+            {
+                navigationManager.NavigateTo("/");
+            }
+
         }
     }
 
     void GoBack()
     {
-        navigationManager.NavigateTo("/myOrders");
+        navigationManager.NavigateTo("/siparislerim");
     }
 
     string GetStatusBadge(string status)
@@ -219,7 +227,7 @@
             ApiSettings.orderId = 0;
             ToastService.ShowSuccess("Sipariş Başarılı Şekilde İptal Edildi");
             await Task.Delay(1500);
-            navigationManager.NavigateTo("/myOrders");
+            navigationManager.NavigateTo("/siparislerim");
         }
         catch
         {
@@ -236,7 +244,7 @@
             ApiSettings.orderId = 0;
             ToastService.ShowSuccess("İade Talebiniz Oluşturuldu");
             await Task.Delay(1500);
-            navigationManager.NavigateTo("/myOrders");
+            navigationManager.NavigateTo("/siparislerim");
         }
         catch
         {

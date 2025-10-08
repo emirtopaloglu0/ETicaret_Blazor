@@ -1,5 +1,5 @@
-﻿@page "/deliveries"
-@page "/deliveries/{maskedCompanyId}"
+﻿@page "/teslimatlar"
+@page "/teslimatlar/{maskedCompanyId}"
 @rendermode InteractiveServer
 @attribute [StreamRendering]
 
@@ -173,10 +173,18 @@
     {
         if (firstRender)
         {
-            companyId = MaskService.Decode(maskedCompanyId);
-            ApiSettings.companyId = Convert.ToInt32(companyId);
-            orders = await RequestManager.GetAsync<List<GetOrderViewModel>>(ApiSettings.GetOrdersByCompanyId);
-            StateHasChanged();
+            try
+            {
+                companyId = MaskService.Decode(maskedCompanyId);
+                ApiSettings.companyId = Convert.ToInt32(companyId);
+                orders = await RequestManager.GetAsync<List<GetOrderViewModel>>(ApiSettings.GetOrdersByCompanyId);
+                StateHasChanged();
+            }
+            catch
+            {
+                navigationManager.NavigateTo("/");
+            }
+
         }
     }
 
