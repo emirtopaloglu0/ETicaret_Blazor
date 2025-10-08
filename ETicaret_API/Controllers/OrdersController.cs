@@ -84,7 +84,12 @@ namespace ETicaret_API.Controllers
             return Ok(response);
         }
 
-        // iade talebi mağazanın önüne gelecek. Eğer mağaza onaylarsa iade kabul edilecek. Bunun için ayrı tablo gerekebilir. 
-        // Bu talep sadece durumu tamamlanmış olanlar için geçerlidir.
+        [HttpGet("with-items-by-shopId/{shopId}")]
+        public async Task<ActionResult<IEnumerable<List<GetOrderWithItemsDto>>>> GetWithItemsByShopId(int shopId)
+        {
+            var response = await _orderRepository.GetWithItemsByShopId(shopId);
+            return Ok(response);
+        }
+
     }
 }

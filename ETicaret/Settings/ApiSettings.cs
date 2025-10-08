@@ -74,6 +74,7 @@
         public string UpdateOrderStatus => $"{BaseUrl}Orders/updateCargo/{orderId}";
         public string GetOrdersByCompanyId => $"{BaseUrl}Orders/GetByCompanyId/{companyId}";
         public string GetRefundRequestOrders => $"{BaseUrl}Orders/refund-requests/{shopId}";
+        public string GetOrdersWithItemsByShopId => $"{BaseUrl}Orders/with-items-by-shopId/{shopId}";
         #endregion
 
     }

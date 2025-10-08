@@ -99,7 +99,7 @@
             </div>
             <!-- Footer -->
             <div class="card-footer d-flex justify-content-between align-items-center bg-white">
-                @if (orderWithItems.Status != OrderStatus.Iptal && orderWithItems.Status != OrderStatus.Tamamlandi)
+                @if (orderWithItems.Status == OrderStatus.Bekliyor)
                 {
                     <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
                         <i class="bi bi-x-circle"></i> İptal Et
@@ -199,6 +199,8 @@
             OrderStatus.Bekliyor => "bg-warning text-dark",
             OrderStatus.Kargoda => "bg-info text-dark",
             OrderStatus.Iptal => "bg-danger",
+            OrderStatus.IadeReddedildi => "bg-dark",
+            OrderStatus.IadeOnaylandı => "bg-success",
             _ => "bg-secondary"
         };
     }

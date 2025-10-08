@@ -17,5 +17,6 @@ namespace ETicaret_Application.Interfaces
         Task UpdateCargoStatus(int id, string status);
         Task<List<GetOrderDto>> GetByCompanyId(int id);
         Task<List<GetOrderWithItemsDto>> GetRefundRequestOrders(int shopId);
+        Task<List<GetOrderWithItemsDto>> GetWithItemsByShopId(int shopId);
     }
 }

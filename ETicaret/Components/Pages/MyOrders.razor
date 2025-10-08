@@ -129,7 +129,9 @@
         { "Kargoda Olanlar", OrderStatus.Kargoda },
         { "Tamamlananlar", OrderStatus.Tamamlandi },
         { "İptal Edilenler", OrderStatus.Iptal },
-        { "İadeler", OrderStatus.IadeOnaylandı}
+        { "Onaylanan İadeler", OrderStatus.IadeOnaylandı},
+        { "Reddedilenler İadeler", OrderStatus.IadeReddedildi},
+        { "İade Bekleyenler", OrderStatus.IadeTalepEdildi},
     };
 
     IEnumerable<OrderViewModel> FilteredOrders =>
@@ -178,6 +180,8 @@
             OrderStatus.Bekliyor => "bg-warning text-dark",
             OrderStatus.Kargoda => "bg-info text-dark",
             OrderStatus.Iptal => "bg-danger",
+            OrderStatus.IadeReddedildi => "bg-dark",
+            OrderStatus.IadeOnaylandı => "bg-success",
             _ => "bg-secondary"
         };
     }
