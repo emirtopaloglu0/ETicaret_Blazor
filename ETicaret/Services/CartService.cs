@@ -3,7 +3,6 @@ using ETicaret_UI.ViewModals;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Text.Json;
 
-
 namespace ETicaret_UI.Services
 {
     public class CartService
@@ -14,20 +13,15 @@ namespace ETicaret_UI.Services
             public int Quantity { get; set; }
         }
 
-        string userId = string.Empty;
-
-        private readonly ILocalStorageService _localStorage;
+        private string userId = string.Empty;
         private readonly ProtectedSessionStorage _protectedSessionStorage;
-        //private const string CartStorageKey = "user_cart";
-
         private readonly List<CartItem> _items = new();
-        public IReadOnlyList<CartItem> Items => _items;
 
+        public IReadOnlyList<CartItem> Items => _items;
         public event Action? OnChange;
 
-        public CartService(ILocalStorageService localStorage, ProtectedSessionStorage protectedSessionStorage)
+        public CartService(ProtectedSessionStorage protectedSessionStorage)
         {
-            _localStorage = localStorage;
             _protectedSessionStorage = protectedSessionStorage;
         }
 
@@ -37,16 +31,14 @@ namespace ETicaret_UI.Services
         public async Task InitializeAsync(string id)
         {
             userId = id;
-            var stored = await _localStorage.GetItemAsStringAsync(GetCartKeyForUser(userId));
-            if (!string.IsNullOrEmpty(stored))
+
+            var result = await _protectedSessionStorage.GetAsync<List<CartItem>>(GetCartKeyForUser(userId));
+
+            if (result.Success && result.Value != null)
             {
-                var restored = JsonSerializer.Deserialize<List<CartItem>>(stored);
-                if (restored != null)
-                {
-                    _items.Clear();
-                    _items.AddRange(restored);
-                    NotifyChanged();
-                }
+                _items.Clear();
+                _items.AddRange(result.Value);
+                NotifyChanged();
             }
         }
 
@@ -76,8 +68,11 @@ namespace ETicaret_UI.Services
             var item = _items.FirstOrDefault(x => x.Product.Id == productId);
             if (item != null)
             {
-                if (quantity <= 0) _items.Remove(item);
-                else item.Quantity = quantity;
+                if (quantity <= 0)
+                    _items.Remove(item);
+                else
+                    item.Quantity = quantity;
+
                 await SaveAsync();
             }
         }
@@ -85,19 +80,18 @@ namespace ETicaret_UI.Services
         public async Task Clear()
         {
             _items.Clear();
-            await _localStorage.RemoveItemAsync(GetCartKeyForUser(userId));
+            await _protectedSessionStorage.DeleteAsync(GetCartKeyForUser(userId));
             NotifyChanged();
         }
 
         private async Task SaveAsync()
         {
-            await _localStorage.SetItemAsync(GetCartKeyForUser(userId), _items);
+            await _protectedSessionStorage.SetAsync(GetCartKeyForUser(userId), _items);
             NotifyChanged();
         }
 
         private string GetCartKeyForUser(string? userId) =>
-    string.IsNullOrEmpty(userId) ? "guest_cart" : $"cart_{userId}";
-
+            string.IsNullOrEmpty(userId) ? "guest_cart" : $"cart_{userId}";
 
         private void NotifyChanged() => OnChange?.Invoke();
     }
