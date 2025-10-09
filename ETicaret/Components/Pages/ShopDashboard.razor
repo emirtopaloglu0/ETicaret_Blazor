@@ -1,0 +1,290 @@
+﻿@page "/magaza-kontrol-paneli"
+@page "/magaza-kontrol-paneli/{maskedShopId}"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@using ETicaret_UI.ViewModals
+@using ETicaret_UI.Enums
+@using System.Globalization
+@inject NavigationManager navigationManager
+@inject IJSRuntime JS;
+
+<PageTitle>Mağaza Kontrol Paneli</PageTitle>
+
+<AuthorizeView Roles="@UserRoleEnums.ShopUser">
+    <Authorized>
+        <div class="container-fluid py-4">
+
+            <h2 class="fw-bold mb-4 text-center">📊 @shop.Name Mağaza Paneli</h2>
+            <p class="text-center text-muted mb-5">@shop.Description</p>
+
+            <!-- GELİR KARTLARI -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Toplam Gelir</h6>
+                            <h3 class="fw-bold text-success">@totalRevenue.ToString("C", CultureInfo.GetCultureInfo("tr-TR"))</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Bugünkü Gelir</h6>
+                            <h3 class="fw-bold text-primary">@todayRevenue.ToString("C", CultureInfo.GetCultureInfo("tr-TR"))</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Bu Ayki Gelir</h6>
+                            <h3 class="fw-bold text-info">@monthlyRevenue.ToString("C", CultureInfo.GetCultureInfo("tr-TR"))</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Bu Yılki Gelir</h6>
+                            <h3 class="fw-bold text-warning">@yearlyRevenue.ToString("C", CultureInfo.GetCultureInfo("tr-TR"))</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRAFİKLER -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Kategori Bazlı Satış Dağılımı</h5>
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Ürün Bazlı Satış Dağılımı</h5>
+                            <canvas id="productChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EN ÇOK SATANLAR -->
+            <div class="card shadow-sm border-0 mb-5">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">🔥 En Çok Satan Ürünler</h5>
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Ürün</th>
+                                <th>Kategori</th>
+                                <th>Satış Adedi</th>
+                                <th>Toplam Gelir</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in topSellingProducts)
+                            {
+                                <tr>
+                                    <td>@item.ProductName</td>
+                                    <td>@item.CategoryName</td>
+                                    <td>@item.TotalQuantity</td>
+                                    <td>@item.TotalRevenue.ToString("C", CultureInfo.GetCultureInfo("tr-TR"))</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- İADELER -->
+            <div class="card shadow-sm border-0 mb-5">
+                <div class="card-body">
+                    <h5 class="card-title mb-3 text-danger">🔁 İade Edilen Ürünler</h5>
+                    @if (refundOrders.Any())
+                    {
+                        <table class="table table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Sipariş No</th>
+                                    <th>Ürün</th>
+                                    <th>Adet</th>
+                                    <th>Tutar</th>
+                                    <th>Tarih</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in refundOrders)
+                                {
+                                    @foreach (var item in order.Items)
+                                    {
+                                        <tr>
+                                            <td>@order.Id</td>
+                                            <td>@item.ProductName</td>
+                                            <td>@item.Quantity</td>
+                                            <td>@Convert.ToString((item.Quantity * item.UnitPrice).ToString("C", CultureInfo.GetCultureInfo("tr-TR")))</td>
+                                            <td>@order.OrderDate.ToShortDateString()</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Henüz iade edilen ürün yok.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <script>
+
+                        window.renderShopCharts = (categoryData, productData) => {
+                const catCtx = document.getElementById('categoryChart');
+                const prodCtx = document.getElementById('productChart');
+
+                if (!catCtx || !prodCtx) {
+                    console.error("Chart canvas elementleri bulunamadı!");
+                    return;
+                }
+
+                console.log("Category Data:", categoryData);
+                console.log("Product Data:", productData);
+
+                new Chart(catCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: categoryData.map(x => x[0]),
+                        datasets: [{
+                            data: categoryData.map(x => x[1]),
+                            backgroundColor: [
+                                '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF',
+                                '#FF9F40', '#C9CBCF', '#D45087', '#2F4B7C', '#F95D6A'
+                            ]
+                        }]
+                    }
+                });
+
+                new Chart(prodCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: productData.map(x => x[0]),
+                        datasets: [{
+                            label: 'Gelir (₺)',
+                            data: productData.map(x => x[1]),
+                            backgroundColor: '#4BC0C0'
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Gelir (₺)' } }
+                        }
+                    }
+                });
+            };
+
+
+        </script>
+
+    </Authorized>
+    <NotAuthorized>
+        <ETicaret_UI.Components.Pages.AuthPages.AccessDenied />
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+@code {
+    [Parameter] public string maskedShopId { get; set; }
+    int shopId;
+    ShopViewModal shop = new();
+    List<GetOrderWithItemsViewModel> orders = new();
+    List<GetOrderWithItemsViewModel> refundOrders = new();
+
+    // GELİR HESAPLARI
+    decimal totalRevenue = 0;
+    decimal todayRevenue = 0;
+    decimal monthlyRevenue = 0;
+    decimal yearlyRevenue = 0;
+
+    // GRAFİK VERİLERİ
+    List<(string Category, int Revenue)> categoryRevenue = new();
+    List<(string Product, decimal Revenue)> productRevenue = new();
+
+    // EN ÇOK SATANLAR
+    List<(string ProductName, string CategoryName, int TotalQuantity, decimal TotalRevenue)> topSellingProducts = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        shopId = MaskService.Decode(maskedShopId);
+        ApiSettings.shopId = shopId;
+
+        shop = await RequestManager.GetAsync<ShopViewModal>(ApiSettings.GetShopById);
+        orders = await RequestManager.GetAsync<List<GetOrderWithItemsViewModel>>(ApiSettings.GetOrdersWithItemsByShopId);
+        refundOrders = orders.Where(o => o.Status == OrderStatus.IadeOnaylandı || o.Status == OrderStatus.IadeTalepEdildi).ToList();
+
+        ApiSettings.shopId = 0;
+
+        CalculateRevenues();
+        StateHasChanged();
+        await PrepareCharts();
+    }
+
+    void CalculateRevenues()
+    {
+        var now = DateTime.Now;
+
+        var completedOrders = orders.Where(o => o.Status == OrderStatus.Tamamlandi || o.Status == OrderStatus.IadeReddedildi);
+
+        totalRevenue = completedOrders.Sum(o => o.TotalAmount);
+        todayRevenue = completedOrders.Where(o => o.OrderDate.Date == now.Date).Sum(o => o.TotalAmount);
+        monthlyRevenue = completedOrders.Where(o => o.OrderDate.Month == now.Month && o.OrderDate.Year == now.Year).Sum(o => o.TotalAmount);
+        yearlyRevenue = completedOrders.Where(o => o.OrderDate.Year == now.Year).Sum(o => o.TotalAmount);
+
+        // Ürün bazlı
+        var productGroups = completedOrders
+            .SelectMany(o => o.Items)
+            .GroupBy(i => new { i.ProductName, i.ProductCategory })
+            .Select(g => new
+            {
+                g.Key.ProductName,
+                g.Key.ProductCategory,
+                TotalQuantity = g.Sum(x => x.Quantity),
+                TotalRevenue = g.Sum(x => x.Quantity * x.UnitPrice)
+            })
+            .OrderByDescending(x => x.TotalRevenue)
+            .Take(10)
+            .ToList();
+
+        topSellingProducts = productGroups.Select(g => (g.ProductName, g.ProductCategory, g.TotalQuantity, g.TotalRevenue)).ToList();
+
+        // Kategori bazlı
+        categoryRevenue = productGroups
+            .GroupBy(x => x.ProductCategory)
+            .Select(g => (g.Key, g.Sum(x => x.TotalQuantity)))
+            .ToList();
+
+        // Ürün bazlı
+        productRevenue = productGroups
+            .Select(x => (x.ProductName, x.TotalRevenue))
+            .ToList();
+    }
+
+    async Task PrepareCharts()
+    {
+        var categoryData = categoryRevenue.Select(x => new object[] { x.Category, x.Revenue }).ToArray();
+        var productData = productRevenue.Select(x => new object[] { x.Product, x.Revenue }).ToArray();
+
+        await JS.InvokeVoidAsync("renderShopCharts", categoryData, productData);
+    }
+
+
+}

@@ -25,6 +25,7 @@ namespace ETicaret_Core.Entities
         public int DeliveryCompanyId { get; set; }
         public string DeliveryCompanyName { get; set; }
 
+        public List<OrderItem> orderItems { get; set; }
 
         private readonly List<OrderItem> _items = new();
         public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();

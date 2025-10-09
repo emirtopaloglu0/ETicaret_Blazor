@@ -1,0 +1,81 @@
+﻿@using ETicaret_UI.Services
+@using ETicaret_UI.ViewModals
+@implements IDisposable
+
+<div class="dropdown ms-4">
+    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-cart"></i>
+        <span class="ms-1">Sepet</span>
+        <span class="badge bg-danger ms-2">@CartService.TotalCount</span>
+    </button>
+    <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 320px;">
+        @if (CartService.Items.Count == 0)
+        {
+            <div class="text-center p-3">Sepetiniz boş</div>
+        }
+        else
+        {
+            @foreach (var it in CartService.Items)
+            {
+                <div class="d-flex align-items-center mb-2">
+                    <img src="@(!string.IsNullOrEmpty(it.Product.ImageUrl) ? it.Product.ImageUrl : "https://via.placeholder.com/64")"
+                         style="width:60px;height:60px;object-fit:cover;border-radius:4px" />
+                    <div class="ms-2 flex-grow-1">
+                        <div class="fw-bold">@it.Product.Name</div>
+                        <div class="small text-muted">@it.Product.Price.ToString("C") x @it.Quantity</div>
+                    </div>
+                    <div class="ms-2 d-flex flex-column">
+                        <button class="btn btn-sm btn-outline-secondary mb-1" @onclick="() => UpdateQuantity(it.Product.Id, it.Quantity + 1)">+</button>
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => UpdateQuantity(it.Product.Id, it.Quantity - 1)">-</button>
+                    </div>
+                    <div class="ms-2 d-flex flex-column">
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveItem(it.Product.Id)">
+                            X
+                        </button>
+                    </div>
+                </div>
+            }
+
+            <div class="dropdown-divider"></div>
+
+            <div class="d-flex justify-content-between align-items-center px-2">
+                <div class="fw-bold">Toplam:</div>
+                <div class="fw-bold">@CartService.TotalAmount.ToString("C")</div>
+            </div>
+
+            <div class="mt-2">
+                <a class="btn btn-primary w-100" href="odeme">Ödeme / Sepete Git</a>
+            </div>
+            <div class="mt-2">
+                <button class="btn btn-danger w-100" @onclick="() => ClearCart()">Sepeti Temizle</button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // UI güncellemesi için abone ol
+        CartService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
+    }
+
+    async Task UpdateQuantity(int productId, int quantity)
+    {
+        await CartService.UpdateQuantity(productId, quantity);
+    }
+
+    async Task RemoveItem(int productId)
+    {
+        await CartService.RemoveFromCart(productId);
+    }
+    async Task ClearCart()
+    {
+        await CartService.Clear();
+    }
+}

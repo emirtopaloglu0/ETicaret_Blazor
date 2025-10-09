@@ -1,30 +1,133 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using System.Security.Claims
+@using ETicaret_UI.ViewModals
+@inject ETicaret_UI.Services.RequestManager RequestManager
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<header class="navbar navbar-expand-lg custom-navbar">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">ETicaret</a>
+        <a class="navbar-brand text-white fw-bold" href="/">E-Ticaret</a>
+
+        <!-- Toggler (mobilde hamburger menü) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menü -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto links ms-4">
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/">Ana Sayfa</a>
+                </li>
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="hesap">Hesabım</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="@UserRoleEnums.Customer">
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="siparislerim">Siparişlerim</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="@UserRoleEnums.Admin">
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="admin">Admin Paneli</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="@UserRoleEnums.ShopUser">
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/magaza/@MaskService.Encode(shopId)">Mağazam</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/iade-talepleri/@MaskService.Encode(shopId)">İade Talepleri</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/magaza-kontrol-paneli/@MaskService.Encode(shopId)">Kontrol Paneli</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="@UserRoleEnums.Deliverer">
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/teslimatlar/@MaskService.Encode(deliveryCompanyId)">Teslimatlar</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+
+                <li class="nav-item">
+                    <ETicaret_UI.Components.Pages.Cart />
+                </li>
+            </ul>
+
+            <!-- Sağ tarafta Login/Logout -->
+            <div class="d-flex ms-lg-3">
+                <AuthorizeView>
+                    <Authorized>
+                        <a class="btn btn-danger btn-sm" href="logout">Çıkış Yap</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a class="btn btn-info btn-sm" href="login">Giriş Yap</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
     </div>
-</div>
+</header>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+@code {
+    int shopId = 0;
+    int deliveryCompanyId = 0;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await AuthProvider.GetAuthenticationStateAsync();
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+            var user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
+            if (user != null)
+            {
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+                ApiSettings.userId = user.Id.ToString();
+                if (user.Role == UserRoleEnums.ShopUser)
+                {
+                    var shopUser = await RequestManager.GetAsync<ShopUserViewModal>(ApiSettings.GetShopByUserId);
 
+                    if (shopUser != null && shopUser.UserId == user.Id)
+                    {
+                        shopId = shopUser.ShopId;
+
+                    }
+                }
+                else if (user.Role == UserRoleEnums.Deliverer)
+                {
+                    var deliverer = await RequestManager.GetAsync<DelivererViewModal>(ApiSettings.GetCompanyByUserId);
+                    if (deliverer != null && deliverer.UserId == user.Id)
+                    {
+                        deliveryCompanyId = deliverer.CompanyId;
+                    }
+                }
+                StateHasChanged();
+                ApiSettings.userId = "";
+            }
+            await CartService.InitializeAsync(user?.Id.ToString());
+
+
+        }
+    }
+}

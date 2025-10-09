@@ -1,0 +1,239 @@
+﻿@page "/teslimatlar"
+@page "/teslimatlar/{maskedCompanyId}"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Teslimatlar</PageTitle>
+
+<AuthorizeView Roles="@UserRoleEnums.Deliverer">
+    <Authorized>
+        <div class="container my-5">
+            <h2 class="fw-bold mb-4 text-center text-primary">
+                <i class="bi bi-truck"></i> Teslimatlar
+            </h2>
+
+            <!-- Filtre Butonları -->
+            <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                @foreach (var status in statusFilters)
+                {
+                    <button class="btn @(selectedStatus == status.Value ? "btn-primary" : "btn-outline-primary")"
+                            @onclick="() => FilterOrders(status.Value)">
+                        @status.Key
+                    </button>
+                }
+            </div>
+
+            @if (pagedOrders != null && pagedOrders.Any())
+            {
+                <div class="d-flex flex-column gap-4">
+                    @foreach (var order in pagedOrders)
+                    {
+                        <div class="card border-0 shadow-lg rounded-3 order-card">
+                            <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold text-secondary">
+                                    <i class="bi bi-calendar-event"></i> @order.OrderDate.ToString("dd.MM.yyyy")
+                                </span>
+                                <span class="badge @GetStatusBadge(order.Status) px-3 py-2 fs-6">@order.Status</span>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p class="mb-2">
+                                            <strong>Tutar:</strong>
+                                            <span class="text-success fw-bold">@order.TotalAmount.ToString("C")</span>
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Adres:</strong> @order.ShippingAddress
+                                        </p>
+                                        @*  <p class="mb-0">
+                                            <strong>Kargo Firması:</strong> @order.CompanyName
+                                        </p> *@
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex flex-column justify-content-center align-items-end">
+                                    @if (order.Status == OrderStatus.Bekliyor)
+                                    {
+                                        <button class="btn btn-info btn-sm w-100 mb-2"
+                                                @onclick="() => OpenConfirmModal(order.Id, OrderStatus.Kargoda)">
+                                            <i class="bi bi-box-seam"></i> Kargoya Al
+                                        </button>
+                                    }
+                                    else if (order.Status == OrderStatus.Kargoda)
+                                    {
+                                        <button class="btn btn-success btn-sm w-100 mb-2"
+                                                @onclick="() => OpenConfirmModal(order.Id, OrderStatus.Tamamlandi)">
+                                            <i class="bi bi-check-circle"></i> Tamamlandı Olarak İşaretle
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small fst-italic">İşlem yapılmaz</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">Önceki</button>
+                        </li>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            int pageNo = i;
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(pageNo)">@i</button>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">Sonraki</button>
+                        </li>
+                    </ul>
+                </nav>
+            }
+            else
+            {
+                <div class="alert alert-info text-center shadow-sm">
+                    <i class="bi bi-info-circle"></i> Sipariş bulunmamaktadır.
+                </div>
+            }
+        </div>
+
+        <!-- Onay Modalı -->
+        @if (showConfirmModal)
+        {
+            <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow-lg border-0 rounded-3">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title"><i class="bi bi-question-circle"></i> Onay</h5>
+                            <button type="button" class="btn-close btn-close-white" @onclick="CloseConfirmModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="fs-6">Bu siparişin durumunu <strong>@targetStatus</strong> yapmak istediğinize emin misiniz?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" @onclick="CloseConfirmModal">Vazgeç</button>
+                            <button class="btn btn-primary" @onclick="ConfirmChange">Onayla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </Authorized>
+
+    <NotAuthorized>
+        <ETicaret_UI.Components.Pages.AuthPages.AccessDenied />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter] public string maskedCompanyId { get; set; }
+
+    int companyId;
+    List<GetOrderViewModel> orders = new();
+    string? selectedStatus = null;
+
+    int currentPage = 1;
+    int pageSize = 6;
+    int totalPages => (int)Math.Ceiling((decimal)(FilteredOrders.Count()) / pageSize);
+
+    // Modal state
+    bool showConfirmModal = false;
+    int targetOrderId;
+    string targetStatus;
+
+    //enums klasörünün içinde genel bir filtre olarak yapılmalı
+    Dictionary<string, string?> statusFilters = new()
+    {
+        { "Tümü", null },
+        { "Bekleyenler", OrderStatus.Bekliyor },
+        { "Kargoda Olanlar", OrderStatus.Kargoda },
+        { "Tamamlananlar", OrderStatus.Tamamlandi },
+        { "İptal Edilenler", OrderStatus.Iptal },
+        {"İadeler", OrderStatus.IadeOnaylandı}
+    };
+
+    IEnumerable<GetOrderViewModel> FilteredOrders =>
+        string.IsNullOrEmpty(selectedStatus)
+            ? orders
+            : orders.Where(o => o.Status == selectedStatus);
+
+    IEnumerable<GetOrderViewModel> pagedOrders =>
+        FilteredOrders.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                companyId = MaskService.Decode(maskedCompanyId);
+                ApiSettings.companyId = Convert.ToInt32(companyId);
+                orders = await RequestManager.GetAsync<List<GetOrderViewModel>>(ApiSettings.GetOrdersByCompanyId);
+                StateHasChanged();
+            }
+            catch
+            {
+                navigationManager.NavigateTo("/");
+            }
+
+        }
+    }
+
+    void OpenConfirmModal(int orderId, string status)
+    {
+        targetOrderId = orderId;
+        targetStatus = status;
+        showConfirmModal = true;
+    }
+
+    void CloseConfirmModal()
+    {
+        showConfirmModal = false;
+    }
+
+    async Task ConfirmChange()
+    {
+        showConfirmModal = false;
+        ApiSettings.orderId = targetOrderId;
+        await RequestManager.PutAsync<string, object>(ApiSettings.UpdateOrderStatus, targetStatus);
+
+        var order = orders.FirstOrDefault(o => o.Id == targetOrderId);
+        if (order != null)
+            order.Status = targetStatus;
+
+        StateHasChanged();
+    }
+
+    void FilterOrders(string? status)
+    {
+        selectedStatus = status;
+        currentPage = 1;
+    }
+
+    void ChangePage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+            currentPage = page;
+    }
+
+    string GetStatusBadge(string status)
+    {
+        return status switch
+        {
+            OrderStatus.Tamamlandi => "bg-success",
+            OrderStatus.Bekliyor => "bg-warning text-dark",
+            OrderStatus.Kargoda => "bg-info text-dark",
+            OrderStatus.Iptal => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}

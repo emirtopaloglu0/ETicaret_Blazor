@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36511.14 d17.14
+VisualStudioVersion = 17.14.36511.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETicaret_UI", "ETicaret\ETicaret_UI.csproj", "{08380F50-CACA-4C19-815A-F4A9A9914561}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETicaret_Application", "ETicaret_Application\ETicaret_Application.csproj", "{8D5A7306-46E2-4C0B-825B-539DB79D9CBB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ETicaret_Infrastructure", "ETicaret_Infrastructure\ETicaret_Infrastructure.csproj", "{720519FD-B1B7-4F6F-AAEB-31C5D9CFE234}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enums", "Enums\Enums.csproj", "{598E7017-4A1D-4097-B4B1-A3E4678F981E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{720519FD-B1B7-4F6F-AAEB-31C5D9CFE234}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{720519FD-B1B7-4F6F-AAEB-31C5D9CFE234}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{720519FD-B1B7-4F6F-AAEB-31C5D9CFE234}.Release|Any CPU.Build.0 = Release|Any CPU
+		{598E7017-4A1D-4097-B4B1-A3E4678F981E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{598E7017-4A1D-4097-B4B1-A3E4678F981E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{598E7017-4A1D-4097-B4B1-A3E4678F981E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{598E7017-4A1D-4097-B4B1-A3E4678F981E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

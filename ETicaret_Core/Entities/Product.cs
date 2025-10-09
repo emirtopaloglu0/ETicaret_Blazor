@@ -23,6 +23,7 @@ namespace ETicaret_Core.Entities
         public decimal Price { get; set; }
 
         public string? ImageUrl { get; set; }
+        public bool IsDelete { get; set; }
 
         public DateTime CreatedAt { get; set; }
     }

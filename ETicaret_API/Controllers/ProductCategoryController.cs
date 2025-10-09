@@ -1,5 +1,7 @@
-﻿using ETicaret_Application.DTOs;
+﻿using ETicaret_Application.DTOs.ProductDTOs;
+using ETicaret_Application.Interfaces;
 using ETicaret_Application.UseCases;
+using ETicaret_UI.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,14 +10,18 @@ namespace ETicaret_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class ProductCategoryController : ControllerBase
     {
         private readonly ProductCategoryUseCase _categoryUseCase;
-        public ProductCategoryController(ProductCategoryUseCase categoryUseCase)
+        private readonly IProductCategoryRepository _productCategoryRepository;
+        public ProductCategoryController(ProductCategoryUseCase categoryUseCase, IProductCategoryRepository productCategoryRepository)
         {
             _categoryUseCase = categoryUseCase;
+            _productCategoryRepository = productCategoryRepository;
         }
 
+        [Authorize(Roles = UserRoleEnums.Admin)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateProductCategoryDto dto)
         {
@@ -44,5 +50,23 @@ namespace ETicaret_API.Controllers
             var response = await _categoryUseCase.ExecuteGetById(id);
             return Ok(response);
         }
+
+        [Authorize(Roles = UserRoleEnums.Admin)]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCategory(int id, UpdateCategoryRequest request)
+        {
+            var response = await _categoryUseCase.ExecuteUpdateCategory(id, request.Name, request.Description);
+            return Ok(response);
+        }
+
+        [Authorize(Roles = UserRoleEnums.Admin)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            await _productCategoryRepository.DeleteCategory(id);
+            return Ok();
+        }
+        public record UpdateCategoryRequest(string Name, string Description);
+
     }
 }

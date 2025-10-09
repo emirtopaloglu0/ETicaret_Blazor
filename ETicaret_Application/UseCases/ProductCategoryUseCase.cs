@@ -1,4 +1,4 @@
-﻿using ETicaret_Application.DTOs;
+﻿using ETicaret_Application.DTOs.ProductDTOs;
 using ETicaret_Application.Interfaces;
 using ETicaret_Application.Services;
 using System;
@@ -46,6 +46,7 @@ namespace ETicaret_Application.UseCases
             {
                 categoryList.Add(new GetProductCategoryDto
                 {
+                    Id = item.Id,
                     Name = item.Name,
                     Description = item.Description
                 });
@@ -61,6 +62,17 @@ namespace ETicaret_Application.UseCases
                 Description = response.Description,
             };
             return domain;
+        }
+
+        public async Task<GetProductCategoryDto?> ExecuteUpdateCategory(int id, string name, string description)
+        {
+            var response = await _productCategoryRepository.UpdateCategory(id, name, description);
+            return new GetProductCategoryDto
+            {
+                Id = response.Id,
+                Name = response.Name,
+                Description = response.Description
+            };
         }
     }
 }

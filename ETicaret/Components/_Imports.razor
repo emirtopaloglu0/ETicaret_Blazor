@@ -1,5 +1,6 @@
 ﻿@using System.Net.Http
 @using System.Net.Http.Json
+@using ETicaret_UI.Services
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
@@ -8,3 +9,22 @@
 @using Microsoft.JSInterop
 @using ETicaret_UI
 @using ETicaret_UI.Components
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject NavigationManager navigationManager;
+@inject ETicaret_UI.Auth.CustomAuthenticationStateProvider AuthProvider
+@inject ETicaret_UI.Services.RequestManager RequestManager
+@inject ETicaret_UI.Settings.ApiSettings ApiSettings
+@using System.Text.Json
+@using Blazored.Toast
+@using Blazored.Toast.Configuration
+@using Blazored.Toast.Services
+@inject Blazored.Toast.Services.IToastService ToastService
+@using Enums
+@using ETicaret_UI.ViewModals
+@inject CartService CartService
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
+@inject IdMaskService MaskService

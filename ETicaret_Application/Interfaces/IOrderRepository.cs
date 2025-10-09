@@ -1,4 +1,5 @@
-﻿using ETicaret_Core.Entities;
+﻿using ETicaret_Application.DTOs.OrderDTOs;
+using ETicaret_Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,11 @@ namespace ETicaret_Application.Interfaces
     {
         Task<Order?> GetByIdAsync(int id);
         Task AddAsync(Order order);
-        Task<List<Order>?> GetOrdersAsync();
+        Task<List<Order>?> GetOrdersAsync(int userId);
+        Task<Order?> GetWithItemsAsync(int id);
+        Task UpdateCargoStatus(int id, string status);
+        Task<List<GetOrderDto>> GetByCompanyId(int id);
+        Task<List<GetOrderWithItemsDto>> GetRefundRequestOrders(int shopId);
+        Task<List<GetOrderWithItemsDto>> GetWithItemsByShopId(int shopId);
     }
 }

@@ -1,0 +1,18 @@
+﻿@page "/logout"
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<h3>Çıkış yapılıyor...</h3>
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await AuthProvider.MarkUserAsLoggedOut();
+            navigationManager.NavigateTo("/", true);
+        }
+    }
+}

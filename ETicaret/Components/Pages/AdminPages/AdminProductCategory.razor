@@ -1,0 +1,276 @@
+﻿@page "/admin-urun-kategorileri"
+@using ETicaret_UI.ViewModals
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Admin Category Panel</PageTitle>
+
+<AuthorizeView Roles="admin">
+    <Authorized>
+        <div class="container mt-4">
+
+            <BlazoredToasts Position="ToastPosition.BottomRight"
+                            Timeout="10"
+                            ShowCloseButton="@true"
+                            MaxToastCount="3"
+                            IconType="IconType.FontAwesome"
+                            SuccessClass="success-toast-override"
+                            SuccessIcon="fa fa-thumbs-up"
+                            ErrorIcon="fa fa-bug" />
+
+            <!-- Başlık ve Buton -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="fw-bold">📂 Kategoriler</h2>
+                <button class="btn btn-success" @onclick="ShowAddModal">
+                    <i class="fa fa-plus me-2"></i>Yeni Kategori Ekle
+                </button>
+            </div>
+
+            <!-- Tablo -->
+            <div class="table-responsive shadow rounded">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Kategori Adı</th>
+                            <th scope="col">Açıklama</th>
+                            <th scope="col" class="text-center">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in pagedCategories)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@item.Description</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditCategory(item)">
+                                        <i class="bi bi-pen"></i> Düzenle
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(item)">
+                                        <i class="bi bi-trash"></i> Sil
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <button class="page-link" @onclick="PreviousPage">Önceki</button>
+                    </li>
+
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        int pageSize = i;
+                        <li class="page-item @(currentPage == i ? "active" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(pageSize)">@i</button>
+                        </li>
+                    }
+
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <button class="page-link" @onclick="NextPage">Sonraki</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Add / Edit Modal -->
+        @if (showEditModal && selectedCategory != null)
+        {
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow-lg border-0 rounded-3">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">@((isAddMode ? "Yeni Kategori Ekle" : "Kategori Düzenle"))</h5>
+                            <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Kategori Adı</label>
+                                <input class="form-control" @bind="selectedCategory.Name" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Açıklama</label>
+                                <textarea class="form-control" @bind="selectedCategory.Description"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" @onclick="CloseEditModal">İptal</button>
+                            <button class="btn btn-primary" @onclick="SaveEditCategory">Kaydet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Delete Modal -->
+        @if (showDeleteModal)
+        {
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow-lg border-0 rounded-3">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">Silme Onayı</h5>
+                            <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Seçili kategoriyi silmek istediğinizden emin misiniz?</p>
+                            <strong>@selectedCategory?.Name</strong>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" @onclick="CloseDeleteModal">İptal</button>
+                            <button class="btn btn-danger" @onclick="DeleteCategory">Sil</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <ETicaret_UI.Components.Pages.AuthPages.AccessDenied />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    List<CategoryViewModel> categories = new();
+    List<CategoryViewModel> pagedCategories => categories.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+
+    private bool showDeleteModal = false;
+    private bool showEditModal = false;
+    private bool isAddMode = false;
+    private CategoryViewModel? selectedCategory;
+
+    // Pagination
+    private int currentPage = 1;
+    private int pageSize = 5;
+    private int totalPages => (int)Math.Ceiling((double)categories.Count / pageSize);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ReadData();
+        }
+    }
+
+    async Task ReadData()
+    {
+        categories.Clear();
+        var response = await RequestManager.GetAsync<List<JsonElement>>(ApiSettings.GetCategories);
+        foreach (var item in response)
+        {
+            categories.Add(new CategoryViewModel
+            {
+                Id = item.GetProperty("id").GetInt32(),
+                Name = item.GetProperty("name").GetString(),
+                Description = item.GetProperty("description").GetString(),
+            });
+        }
+        currentPage = 1; // liste yenilenince sayfayı başa al
+        StateHasChanged();
+    }
+
+    private void ShowAddModal()
+    {
+        selectedCategory = new CategoryViewModel();
+        isAddMode = true;
+        showEditModal = true;
+    }
+
+    private void EditCategory(CategoryViewModel category)
+    {
+        selectedCategory = new CategoryViewModel
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Description = category.Description
+        };
+        isAddMode = false;
+        showEditModal = true;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedCategory = null;
+    }
+
+    private async Task SaveEditCategory()
+    {
+        try
+        {
+            if (selectedCategory == null) return;
+
+            var payload = new { Name = selectedCategory.Name, Description = selectedCategory.Description };
+
+            if (isAddMode)
+            {
+                await RequestManager.PostAsync<object, string>(ApiSettings.AddCategory, payload);
+            }
+            else
+            {
+                ApiSettings.categoryId = selectedCategory.Id;
+                await RequestManager.PutAsync<object, object>(ApiSettings.UpdateCategory, payload);
+                ApiSettings.categoryId = 0;
+            }
+            ToastService.ShowSuccess("İşlem Başarılı");
+            showEditModal = false;
+            await ReadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void ShowDeleteModal(CategoryViewModel category)
+    {
+        selectedCategory = category;
+        showDeleteModal = true;
+    }
+
+    private void CloseDeleteModal()
+    {
+        showDeleteModal = false;
+        selectedCategory = null;
+    }
+
+    private async Task DeleteCategory()
+    {
+        try
+        {
+            if (selectedCategory == null) return;
+
+            ApiSettings.categoryId = selectedCategory.Id;
+            await RequestManager.DeleteAsync(ApiSettings.DeleteCategory);
+            ApiSettings.categoryId = 0;
+            ToastService.ShowSuccess("Silme Başarılı");
+            showDeleteModal = false;
+            await ReadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+            currentPage--;
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < totalPages)
+            currentPage++;
+    }
+
+    private void GoToPage(int page)
+    {
+        currentPage = page;
+    }
+}

@@ -1,0 +1,193 @@
+﻿@page "/admin-rol-yonetimi"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@using ETicaret_UI.ViewModals
+
+<PageTitle>Rol Değiştirme</PageTitle>
+
+<AuthorizeView Roles="admin">
+    <Authorized>
+        <div class="container mt-5">
+            <h2 class="fw-bold text-center mb-4">👤 Kullanıcı Rol Değiştirme</h2>
+
+            <BlazoredToasts Position="ToastPosition.BottomRight"
+                            Timeout="10"
+                            ShowCloseButton="@true"
+                            MaxToastCount="3"
+                            IconType="IconType.FontAwesome"
+                            SuccessClass="success-toast-override"
+                            SuccessIcon="fa fa-thumbs-up"
+                            ErrorIcon="fa fa-bug" />
+
+            <!-- Arama Alanı -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <label class="form-label fw-bold">📧 Kullanıcı Mail Adresi</label>
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="ornek@mail.com" @bind="searchMail" />
+                        <button class="btn btn-primary" @onclick="GetUser">
+                            <i class="fa fa-search me-1"></i> Kullanıcıyı Bul
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @if (selectedUser != null)
+            {
+                <!-- Kullanıcı Kartı -->
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Kullanıcı Bilgileri</h5>
+                        <p><strong>Ad Soyad:</strong> @selectedUser.FirstName @selectedUser.LastName</p>
+                        <p><strong>Email:</strong> @selectedUser.Email</p>
+                        <p>
+                            <strong>Mevcut Rol:</strong>
+                            <span class="badge bg-info">@selectedUser.Role</span>
+                        </p>
+
+                        <!-- Rol Seçimi -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Yeni Rol</label>
+                            <select class="form-select" @bind="newRole">
+                                <option value="">--Rol Seç--</option>
+                                <option value="customer">Müşteri</option>
+                                <option value="shopUser">Mağaza Kullanıcısı</option>
+                                <option value="deliverer">Kargocu</option>
+                            </select>
+                        </div>
+
+                        @if (newRole == "deliverer")
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Kargo Firmaları</label>
+                                <select class="form-select" @bind="companyId">
+                                    <option value="">--Firma Seçin--</option>
+                                    @foreach (var company in companies)
+                                    {
+                                        <option value=@company.Id> @company.Name </option>
+                                    }
+                                </select>
+                            </div>
+                        }
+                        @if (newRole == "shopUser")
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mağazalar</label>
+                                <select class="form-select" @bind="shopId">
+                                    <option value="">--Mağaza Seçin--</option>
+                                    @foreach (var shop in shops)
+                                    {
+                                        <option value=@shop.Id> @shop.Name </option>
+                                    }
+                                </select>
+                            </div>
+                        }
+
+                        <!-- Onay Butonu -->
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-success" @onclick="ChangeRole">
+                                <i class="fa fa-check me-2"></i>Rolü Güncelle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <ETicaret_UI.Components.Pages.AuthPages.AccessDenied />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string searchMail = string.Empty;
+    private LoggedUserViewModel? selectedUser;
+    private string newRole = string.Empty;
+
+    int companyId = 0;
+    int shopId = 0;
+
+    List<DeliveryCompanyViewModel> companies = new();
+    List<ShopViewModal> shops = new();
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            companies.Clear();
+            var response = await RequestManager.GetAsync<List<JsonElement>>(ApiSettings.GetCompanies);
+            foreach (var item in response)
+            {
+                companies.Add(new DeliveryCompanyViewModel
+                {
+                    Id = item.GetProperty("id").GetInt32(),
+                    Name = item.GetProperty("name").GetString()
+                });
+            }
+
+            shops.Clear();
+            var response2 = await RequestManager.GetAsync<List<JsonElement>>(ApiSettings.GetShops);
+            foreach (var item in response2)
+            {
+                shops.Add(new ShopViewModal
+                {
+                    Id = item.GetProperty("id").GetInt32(),
+                    Name = item.GetProperty("name").GetString(),
+                    Description = item.GetProperty("description").GetString(),
+                });
+            }
+        }
+    }
+
+    private async Task GetUser()
+    {
+        try
+        {
+            ApiSettings.mail = searchMail;
+            var response = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetByMail);
+
+            if (response == null)
+            {
+                ToastService.ShowError("Kullanıcı bulunamadı!");
+                selectedUser = null;
+                return;
+            }
+
+            selectedUser = response;
+            newRole = selectedUser.Role;
+            ToastService.ShowSuccess("Kullanıcı bulundu");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            ToastService.ShowError("Bir hata oluştu.");
+        }
+    }
+
+    private async Task ChangeRole()
+    {
+        try
+        {
+            if (selectedUser == null || string.IsNullOrWhiteSpace(newRole))
+            {
+                ToastService.ShowError("Lütfen kullanıcı seçin ve rol belirleyin!");
+                return;
+            }
+            var payload = new { role = newRole, companyId = companyId, shopId = shopId };
+
+            ApiSettings.userId = selectedUser.Id.ToString();
+            await RequestManager.PutAsync<object, object>(ApiSettings.ChangeRole, payload);
+
+            ToastService.ShowSuccess("Rol başarıyla güncellendi!");
+            selectedUser.Role = newRole;
+            await Task.Delay(1500);
+            navigationManager.NavigateTo("/admin", true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            ToastService.ShowError("Rol güncellenirken hata oluştu!");
+        }
+    }
+}

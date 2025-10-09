@@ -1,0 +1,107 @@
+﻿@page "/login"
+@using ETicaret_UI.Auth
+@using ETicaret_UI.ViewModals
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Giriş Yap</PageTitle>
+
+<div class="container justify-content-center align-items-center">
+    <div class="card shadow-lg border-0 rounded-5">
+        <div class="card-header text-center text-white rounded-top-5"
+             style="background: linear-gradient(135deg, #6a11cb, #2575fc);">
+            <h3 class="mb-0">Giriş Yap</h3>
+        </div>
+        <div class="card-body p-5">
+            <EditForm Model="LoginModel" OnValidSubmit="LoginUser" FormName="LoginForm">
+                <DataAnnotationsValidator />
+
+                @* Mail *@
+                <div class="mb-4">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light">
+                            <i class="bi bi-envelope-fill text-secondary"></i>
+                        </span>
+                        <InputText type="email" class="form-control"
+                                   placeholder="E-Posta"
+                                   @bind-Value="LoginModel.Email" />
+                    </div>
+                    <ValidationMessage For="() => LoginModel.Email" />
+                </div>
+
+                @* Şifre *@
+                <div class="mb-4">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light">
+                            <i class="bi bi-lock-fill text-secondary"></i>
+                        </span>
+                        <InputText type="password" class="form-control"
+                                   placeholder="Şifre"
+                                   @bind-Value="LoginModel.Password" />
+                    </div>
+                    <ValidationMessage For="() => LoginModel.Password" />
+                </div>
+
+                @* Kayıt Ol *@
+                <div class="d-grid gap-3 mt-4">
+                    <button type="submit" class="btn btn-gradient btn-lg rounded-pill shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Giriş Yap
+                    </button>
+                    <a href="register" class="btn btn-outline-dark btn-lg rounded-pill shadow-sm">
+                        <i class="bi bi-person-plus me-2"></i> Kayıt Ol
+                    </a>
+                </div>
+            </EditForm>
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger mt-3">@ErrorMessage</div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-gradient {
+        background: linear-gradient(135deg, #ff512f, #dd2476);
+        color: white;
+        border: none;
+        transition: 0.3s;
+    }
+
+        .btn-gradient:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+</style>
+
+@code {
+
+    private string ErrorMessage = "";
+
+    [SupplyParameterFromForm(FormName = "LoginForm")]
+    public LoginViewModel LoginModel { get; set; } = new();
+
+    private async Task LoginUser()
+    {
+        try
+        {
+            ErrorMessage = "";
+
+            var response = await RequestManager.PostAsync<LoginViewModel, LoginResponse>(ApiSettings.Login, LoginModel);
+
+            await AuthProvider.MarkUserAsAuthenticated(response.Token);
+
+            navigationManager.NavigateTo("/", true);
+        }
+        catch
+        {
+            ErrorMessage = "Hata Oluştu. Lütfen bilgilerinizi kontrol edin.";
+        }
+    }
+
+    public class LoginResponse
+    {
+        public string? Token { get; set; }
+    }
+}

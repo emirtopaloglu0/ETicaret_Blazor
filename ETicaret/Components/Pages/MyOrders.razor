@@ -1,0 +1,188 @@
+﻿@page "/siparislerim"
+@using ETicaret_UI.ViewModals
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>Siparişlerim</PageTitle>
+
+<div class="container my-5">
+    <h3 class="fw-bold mb-4 text-center">
+        <i class="bi bi-box-seam"></i> Siparişlerim
+    </h3>
+
+    <!-- Filtre Butonları -->
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+        @foreach (var status in statusFilters)
+        {
+            <button class="btn @(selectedStatus == status.Value ? "btn-primary" : "btn-outline-primary")"
+                    @onclick="() => FilterOrders(status.Value)">
+                @status.Key
+            </button>
+        }
+    </div>
+
+    @if (pagedOrders != null && pagedOrders.Any())
+    {
+        <div class="d-flex flex-column gap-4">
+            @foreach (var order in pagedOrders)
+            {
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-primary">
+                            <i class="bi bi-calendar-date"></i>
+                            @order.OrderDate.ToString("dd.MM.yyyy")
+                        </span>
+                        <span class="badge @GetStatusBadge(order.Status) px-3 py-2 fs-6">
+                            @order.Status
+                        </span>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-2 d-flex align-items-center">
+                                    <i class="bi bi-cash-stack text-success me-2"></i>
+                                    <strong>Tutar:</strong>
+                                    <span class="text-success fw-bold ms-2">@order.TotalAmount.ToString("C")</span>
+                                </div>
+
+                                <div class="mb-2 d-flex align-items-center">
+                                    <i class="bi bi-truck text-warning me-2"></i>
+                                    <strong>Teslim Tarihi:</strong>
+                                    <span class="ms-2">
+                                        @(order.DeliveryDate.HasValue
+                                                                        ? order.DeliveryDate.Value.ToString("dd.MM.yyyy")
+                                                                        : "-")
+                            </span>
+                        </div>
+
+                                <div class="mb-2 d-flex align-items-center">
+                                    <i class="bi bi-geo-alt text-danger me-2"></i>
+                                    <strong>Adres:</strong>
+                                    <span class="ms-2">@order.ShippingAddress</span>
+                                </div>
+
+                                <div class="mb-2 d-flex align-items-center">
+                                    <i class="bi bi-building text-info me-2"></i>
+                                    <strong>Kargo Firması:</strong>
+                                    <span class="ms-2">@order.CompanyName</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex flex-column justify-content-center align-items-end">
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-2"
+                                    @onclick="() => GoToDetail(order.Id)">
+                                <i class="bi bi-eye"></i> Detay
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                }
+        </div>
+
+        <!-- Pagination -->
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">
+                        <i class="bi bi-chevron-left"></i> Önceki
+                    </button>
+                </li>
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    int pageNo = i;
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <button class="page-link" @onclick="() => ChangePage(pageNo)">@i</button>
+                    </li>
+                }
+                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                    <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">
+                        Sonraki <i class="bi bi-chevron-right"></i>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    }
+    else
+    {
+        <div class="alert alert-info text-center shadow-sm rounded-3">
+            <i class="bi bi-info-circle"></i> Henüz sipariş bulunmamaktadır.
+        </div>
+    }
+</div>
+
+@code {
+    List<OrderViewModel>? orders = new();
+    string? selectedStatus = null;
+
+    int currentPage = 1;
+    int pageSize = 6;
+
+    //enums klasörünün içinde genel bir filtre olarak yapılmalı
+    Dictionary<string, string?> statusFilters = new()
+    {
+        { "Tümü", null },
+        { "Bekleyenler", OrderStatus.Bekliyor },
+        { "Kargoda Olanlar", OrderStatus.Kargoda },
+        { "Tamamlananlar", OrderStatus.Tamamlandi },
+        { "İptal Edilenler", OrderStatus.Iptal },
+        { "Onaylanan İadeler", OrderStatus.IadeOnaylandı},
+        { "Reddedilenler İadeler", OrderStatus.IadeReddedildi},
+        { "İade Bekleyenler", OrderStatus.IadeTalepEdildi},
+    };
+
+    IEnumerable<OrderViewModel> FilteredOrders =>
+    string.IsNullOrEmpty(selectedStatus)
+        ? (orders ?? Enumerable.Empty<OrderViewModel>())
+        : (orders?.Where(o => o.Status == selectedStatus) ?? Enumerable.Empty<OrderViewModel>());
+
+
+    int totalPages => (int)Math.Ceiling((decimal)(FilteredOrders.Count()) / pageSize);
+
+    IEnumerable<OrderViewModel> pagedOrders =>
+        FilteredOrders.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            orders = await RequestManager.GetAsync<List<OrderViewModel>>(ApiSettings.GetOrdersByUser);
+            StateHasChanged();
+        }
+    }
+
+    void ChangePage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+            currentPage = page;
+    }
+
+    void FilterOrders(string? status)
+    {
+        selectedStatus = status;
+        currentPage = 1;
+    }
+
+    void GoToDetail(int id)
+    {
+        var encodedId = MaskService.Encode(id);
+        NavigationManager.NavigateTo($"/siparis-detay/{encodedId}");
+    }
+
+    string GetStatusBadge(string status)
+    {
+        return status switch
+        {
+            OrderStatus.Tamamlandi => "bg-success",
+            OrderStatus.Bekliyor => "bg-warning text-dark",
+            OrderStatus.Kargoda => "bg-info text-dark",
+            OrderStatus.Iptal => "bg-danger",
+            OrderStatus.IadeReddedildi => "bg-dark",
+            OrderStatus.IadeOnaylandı => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+}
