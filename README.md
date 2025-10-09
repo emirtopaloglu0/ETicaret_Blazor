@@ -14,7 +14,7 @@ Mağaza kullanıcısı isterse, kendine ait ürünü düzenlerken GPT yardımıy
 - OpenAI Api Entegrasyonu
 - ASP.NET Data Protection
 - ASP.NET Protected Session Storage
-- BCrypt Hashing
+- BCrypt
 
 
 ## Görseller
