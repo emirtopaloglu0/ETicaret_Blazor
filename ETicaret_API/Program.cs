@@ -105,6 +105,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
 });
 
+builder.Configuration.AddUserSecrets<Program>();
 
 
 var app = builder.Build();
