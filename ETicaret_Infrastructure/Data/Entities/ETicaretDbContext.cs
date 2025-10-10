@@ -15,6 +15,8 @@ public partial class ETicaretDbContext : DbContext
     {
     }
 
+    public virtual DbSet<CartItem> CartItems { get; set; }
+
     public virtual DbSet<Deliverer> Deliverers { get; set; }
 
     public virtual DbSet<DeliveryCompany> DeliveryCompanies { get; set; }
@@ -26,6 +28,10 @@ public partial class ETicaretDbContext : DbContext
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+
+    public virtual DbSet<ProductImage> ProductImages { get; set; }
+
+    public virtual DbSet<ProductSubCategory> ProductSubCategories { get; set; }
 
     public virtual DbSet<Shop> Shops { get; set; }
 
@@ -39,6 +45,23 @@ public partial class ETicaretDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CartItems_Products");
+
+            entity.HasOne(d => d.User).WithMany(p => p.CartItems)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CartItems_Users");
+        });
+
         modelBuilder.Entity<Deliverer>(entity =>
         {
             entity.HasIndex(e => e.UserId, "IX_Deliverers").IsUnique();
@@ -114,12 +137,37 @@ public partial class ETicaretDbContext : DbContext
                 .HasForeignKey(d => d.ShopId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Products_Shops");
+
+            entity.HasOne(d => d.SubCategory).WithMany(p => p.Products)
+                .HasForeignKey(d => d.SubCategoryId)
+                .HasConstraintName("FK_Products_ProductSubCategories");
         });
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.Name).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<ProductImage>(entity =>
+        {
+            entity.Property(e => e.ImageUrl).HasColumnType("text");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductImages)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProductImages_Products");
+        });
+
+        modelBuilder.Entity<ProductSubCategory>(entity =>
+        {
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Name).HasMaxLength(100);
+
+            entity.HasOne(d => d.Category).WithMany(p => p.ProductSubCategories)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProductSubCategories_ProductCategories");
         });
 
         modelBuilder.Entity<Shop>(entity =>

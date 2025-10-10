@@ -83,11 +83,11 @@ namespace ETicaret_API.Controllers
             };
 
             var response = await _productRepository.AddAsync(product);
-            if (!response)
-            {
-                return BadRequest("Kaydetme İşlemi Başarısız!");
-            }
-            return Ok("Kayıt Başarılı");
+            //if (response <= 0)
+            //{
+            //    return BadRequest("Kaydetme İşlemi Başarısız!");
+            //}
+            return Ok(response);
         }
 
         // PUT api/<ProductController>/5
@@ -133,7 +133,7 @@ namespace ETicaret_API.Controllers
             try
             {
                 var desc = await _descUseCase.ExecuteGenerateDescriptionAsync(id);
-                return Ok(desc); 
+                return Ok(desc);
             }
             catch (KeyNotFoundException)
             {

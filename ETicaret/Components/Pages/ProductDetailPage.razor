@@ -1,0 +1,222 @@
+﻿@page "/urun-detay"
+@page "/urun-detay/{encodedProductId}"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@inject IJSRuntime JS;
+
+<PageTitle>@(product?.Name ?? "Ürün Detayı")</PageTitle>
+
+@if (product == null)
+{
+    <div class="text-center mt-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3">Ürün yükleniyor...</p>
+    </div>
+}
+else
+{
+    <div class="container py-5">
+        <div class="row g-5 align-items-start">
+
+            <!-- Sol: Ürün Görselleri -->
+            <div class="col-lg-6 col-md-12">
+                <div class="card border-0 shadow-sm p-3">
+                    @if (allImages?.Count > 0)
+                    {
+                        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner rounded shadow-sm">
+                                @foreach (var (img, index) in allImages.Select((val, i) => (val, i)))
+                                {
+                                    <div class="carousel-item @(index == 0 ? "active" : "")">
+                                        <img src="@img" class="d-block w-100 rounded"
+                                             style="max-height:450px;object-fit:contain;"
+                                             alt="Ürün Görseli @(index + 1)" />
+                                    </div>
+                                }
+                            </div>
+
+                            <button class="carousel-control-prev" type="button"
+                                    data-bs-target="#productCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button"
+                                    data-bs-target="#productCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                            </button>
+                        </div>
+
+                        <!-- Küçük Önizleme Görseller -->
+                        <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">
+                            @foreach (var (thumb, index) in allImages.Select((val, i) => (val, i)))
+                            {
+                                <img src="@thumb"
+                                     class="rounded shadow-sm thumb-img @(index == activeImageIndex ? "active-thumb" : "")"
+                                     style="width:80px;height:80px;object-fit:cover;cursor:pointer;"
+                                     @onclick="() => SetActiveSlide(index)" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/500x400?text=Görsel+Yok"
+                             class="img-fluid rounded" style="max-height:400px;object-fit:contain;" />
+                    }
+                </div>
+            </div>
+
+            <!-- Sağ: Ürün Bilgileri -->
+            <div class="col-lg-6 col-md-12">
+                <div class="card border-0 shadow-sm p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <h2 class="fw-bold mb-3">@product.Name</h2>
+                        <p class="text-muted mb-4">@product.Description</p>
+
+                        <div class="mb-3">
+                            <span class="badge bg-light text-dark me-2">
+                                <i class="bi bi-shop"></i> @product.ShopName
+                            </span>
+                            <span class="badge bg-secondary">
+                                <i class="bi bi-tag"></i> @product.CategoryName
+                            </span>
+                        </div>
+
+                        <h3 class="text-success fw-bold mb-3">
+                            @product.Price.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+                        </h3>
+
+                        @if (product.Stock > 0)
+                        {
+                            <p class="text-success mb-4">
+                                <i class="bi bi-box-seam"></i> Stokta Var (@product.Stock adet)
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="text-danger mb-4">
+                                <i class="bi bi-exclamation-triangle"></i> Stokta Yok
+                            </p>
+                        }
+                    </div>
+
+                    <div>
+                        @if (product.Stock > 0)
+                        {
+                            <button class="btn btn-primary btn-lg w-100 mb-3" @onclick="AddToCart">
+                                <i class="bi bi-cart-plus"></i> Sepete Ekle
+                            </button>
+                        }
+
+                        <a href="/magaza/@MaskService.Encode(product.ShopId)"
+                           class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-shop-window"></i> Mağazaya Git
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script>
+    window.setTitle = (title) => {
+        document.title = title;
+    };
+</script>
+
+<style>
+    .thumb-img {
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+        .thumb-img:hover {
+            transform: scale(1.08);
+            border-color: #0d6efd;
+        }
+
+    .active-thumb {
+        border-color: #0d6efd;
+        box-shadow: 0 0 10px rgba(13,110,253,0.4);
+    }
+
+    .carousel-inner img {
+        transition: transform 0.5s ease-in-out;
+    }
+
+    .carousel-inner:hover img {
+        transform: scale(1.02);
+    }
+
+    #productCarousel {
+        max-height: 450px; /* İstediğin sabit yükseklik */
+        height: 450px;
+        overflow: hidden; /* taşan kısımları gizle */
+    }
+
+        #productCarousel .carousel-inner {
+            height: 100%;
+        }
+
+        #productCarousel .carousel-item img {
+            height: 100%;
+            object-fit: contain; /* or cover istersen değiştir */
+            width: 100%;
+        }
+
+</style>
+
+@code {
+    [Parameter] public string encodedProductId { get; set; }
+
+    int productId = 0;
+    ProductViewModel? product = new();
+    List<ProductImageViewModal>? productImages = new();
+    List<string> allImages = new();
+    int activeImageIndex = 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        productId = MaskService.Decode(encodedProductId);
+        ApiSettings.productId = productId;
+
+        product = await RequestManager.GetAsync<ProductViewModel>(ApiSettings.GetProductById);
+        productImages = await RequestManager.GetAsync<List<ProductImageViewModal>>(ApiSettings.GetProductImage);
+
+        allImages = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(product?.ImageUrl))
+            allImages.Add(product.ImageUrl);
+
+        if (productImages != null)
+            allImages.AddRange(productImages
+                .Where(x => !string.IsNullOrWhiteSpace(x.ImageUrl))
+                .Select(x => x.ImageUrl!));
+
+
+        // 🔹 JS ile sayfa başlığını güncelle
+        await JS.InvokeVoidAsync("setTitle", product?.Name ?? "Ürün Detayı");
+        StateHasChanged();
+    }
+
+    async void SetActiveSlide(int index)
+    {
+        activeImageIndex = index;
+
+        // Carousel instance'ını al
+        var carouselInstance = await JS.InvokeAsync<IJSObjectReference>(
+            "bootstrap.Carousel.getOrCreateInstance",
+            "#productCarousel"
+        );
+
+        // Seçili slayta git
+        await carouselInstance.InvokeVoidAsync("to", index);
+    }
+
+
+    void AddToCart()
+    {
+        CartService.AddToCart(product);
+        ToastService.ShowSuccess($"{product.Name} sepete eklendi!");
+    }
+}

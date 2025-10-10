@@ -11,9 +11,9 @@ namespace ETicaret_Application.Interfaces
 {
     public interface IProductRepository
     {
-        Task<bool> AddAsync(Product product);
+        Task<int> AddAsync(Product product);
         Task<List<ProductDTO>> GetAllProduct();
-        Task<Product?> GetByIdAsync(int id);
+        Task<ProductDTO?> GetByIdAsync(int id);
         Task<List<ProductDTO>?> GetByCategoryIdAsync(int categoryId);
         Task<List<ProductDTO>?> GetByShopIdAsync(int shopId);
         Task DecreaseStockAsync(int productId, int quantity);
