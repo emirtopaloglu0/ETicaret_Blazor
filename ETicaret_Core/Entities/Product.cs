@@ -11,6 +11,7 @@ namespace ETicaret_Core.Entities
         public int Id { get; set; }
 
         public int CategoryId { get; set; }
+        public int? SubCategoryId { get; set; }
 
         public int ShopId { get; set; }
 

@@ -9,6 +9,8 @@ public partial class Product
 
     public int CategoryId { get; set; }
 
+    public int? SubCategoryId { get; set; }
+
     public int ShopId { get; set; }
 
     public string Name { get; set; } = null!;
@@ -25,9 +27,15 @@ public partial class Product
 
     public bool IsDelete { get; set; }
 
+    public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+
     public virtual ProductCategory Category { get; set; } = null!;
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
+    public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
+
     public virtual Shop Shop { get; set; } = null!;
+
+    public virtual ProductSubCategory? SubCategory { get; set; }
 }

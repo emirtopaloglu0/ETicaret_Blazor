@@ -20,7 +20,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
             _context = context;
         }
 
-        public async Task<bool> AddAsync(ETicaret_Core.Entities.Product product)
+        public async Task<int> AddAsync(ETicaret_Core.Entities.Product product)
         {
             try
             {
@@ -36,11 +36,11 @@ namespace ETicaret_Infrastructure.Data.Repositories
                 };
                 await _context.Products.AddAsync(productEntity);
                 await _context.SaveChangesAsync();
-                return true;
+                return productEntity.Id;
             }
             catch
             {
-                return false;
+                return 0;
             }
         }
 
@@ -162,14 +162,22 @@ namespace ETicaret_Infrastructure.Data.Repositories
             return products;
         }
 
-        public async Task<ETicaret_Core.Entities.Product?> GetByIdAsync(int id)
+        public async Task<ProductDTO?> GetByIdAsync(int id)
         {
-            var response = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
-            var domain = new ETicaret_Core.Entities.Product
+            var response = await _context.Products.Include(x => x.Category).Include(x => x.SubCategory)
+                .Include(x => x.Shop)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            var domain = new ProductDTO
             {
                 Id = response.Id,
                 CategoryId = response.CategoryId,
+                CategoryName = response.Category.Name,
+                CategoryDesc = response.Category.Description,
+                SubCategoryId = response.SubCategoryId,
+                SubCategoryName = response.SubCategory?.Name,
                 ShopId = response.ShopId,
+                ShopName = response.Shop.Name,
+                ShopDesc = response.Shop.Description,
                 Name = response.Name,
                 Description = response.Description,
                 Stock = response.Stock,

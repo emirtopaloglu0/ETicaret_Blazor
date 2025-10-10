@@ -29,6 +29,8 @@ builder.Services.AddScoped<IProductRepository, EfProductRepository>();
 builder.Services.AddScoped<IProductCategoryRepository, EfProductCategoryRepository>();
 builder.Services.AddScoped<IDeliveryCompanyRepository, EfDeliveryCompanyRepository>();
 builder.Services.AddScoped<IShopRepository, EfShopRepository>();
+builder.Services.AddScoped<IProductImageRepository, EfProductImageRepository>();
+
 // HttpContext’e erişim için
 builder.Services.AddHttpContextAccessor();
 
@@ -103,6 +105,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
 });
 
+builder.Configuration.AddUserSecrets<Program>();
 
 
 var app = builder.Build();

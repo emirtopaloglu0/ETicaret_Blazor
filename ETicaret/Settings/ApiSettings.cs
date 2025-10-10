@@ -57,6 +57,7 @@
         #region Products
         public int productId { get; set; }
         public string Products => $"{BaseUrl}Product";
+        public string GetProductById => $"{BaseUrl}Product/{productId}";
         public string GetProductsByShopId => $"{BaseUrl}Product/byShop/{shopId}";
         public string AddProduct => $"{BaseUrl}Product";
         public string UpdateProduct => $"{BaseUrl}Product/{productId}";
@@ -77,5 +78,17 @@
         public string GetOrdersWithItemsByShopId => $"{BaseUrl}Orders/with-items-by-shopId/{shopId}";
         #endregion
 
+        #region ProductImage
+
+        int imageId = 0;
+
+        public string GetProductImage => $"{BaseUrl}ProductImage/{productId}";
+        public string AddProductImage => $"{BaseUrl}ProductImage";
+        public string UpdateProductImage => $"{BaseUrl}ProductImage/{productId}";
+        public string DeleteProductImage => $"{BaseUrl}ProductImage/{imageId}";
+        public string IsImageAlreadyExist => $"{BaseUrl}ProductImage/IsImagesExists/{productId}";
+
+
+        #endregion
     }
 }
