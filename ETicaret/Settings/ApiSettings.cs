@@ -103,5 +103,18 @@
 
         #endregion
 
+        #region CartItem
+        public int cartItemId { get; set; }
+
+        public string AddCartItem => $"{BaseUrl}CartItem";
+        public string GetCartItemByUserId => $"{BaseUrl}CartItem/{userId}";
+        public string UpdateCartItem => $"{BaseUrl}CartItem/{cartItemId}";
+        public string DeleteCartItem => $"{BaseUrl}CartItem/{cartItemId}";
+        public string IsUserHaveCartItems => $"{BaseUrl}CartItem/IsUserHaveCartItems/{userId}";
+        public string ClearCart => $"{BaseUrl}CartItem/ClearCart/{userId}";
+
+
+        #endregion
+
     }
 }
