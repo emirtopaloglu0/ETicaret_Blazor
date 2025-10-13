@@ -73,6 +73,7 @@ namespace ETicaret_API.Controllers
             Product product = new Product
             {
                 CategoryId = _product.CategoryId,
+                SubCategoryId = _product.SubCategoryId,
                 ShopId = _product.ShopId,
                 Name = _product.Name,
                 Description = _product.Description,
@@ -103,6 +104,7 @@ namespace ETicaret_API.Controllers
             Product product = new Product
             {
                 CategoryId = _product.CategoryId,
+                SubCategoryId = _product.SubCategoryId,
                 ShopId = _product.ShopId,
                 Name = _product.Name,
                 Description = _product.Description,
@@ -144,7 +146,7 @@ namespace ETicaret_API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        public record _product(int CategoryId, int ShopId, string Name, string Description,
+        public record _product(int CategoryId, int SubCategoryId, int ShopId, string Name, string Description,
             int Stock, decimal Price, string ImageUrl, bool isDelete = false);
     }
 }

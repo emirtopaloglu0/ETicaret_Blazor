@@ -27,6 +27,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
                 Entities.Product productEntity = new Entities.Product
                 {
                     CategoryId = product.CategoryId,
+                    SubCategoryId = product.SubCategoryId,
                     ShopId = product.ShopId,
                     Name = product.Name,
                     Description = product.Description,
@@ -90,6 +91,8 @@ namespace ETicaret_Infrastructure.Data.Repositories
                     CategoryId = product.CategoryId,
                     CategoryName = product.Category.Name,
                     CategoryDesc = product.Category.Description,
+                    SubCategoryId = product.SubCategoryId,
+                    SubCategoryName = product.SubCategory?.Name,
                     ShopId = product.ShopId,
                     ShopName = product.Shop.Name,
                     ShopDesc = product.Shop.Description,
@@ -119,6 +122,8 @@ namespace ETicaret_Infrastructure.Data.Repositories
                     CategoryId = productByCategory.CategoryId,
                     CategoryName = productByCategory.Category.Name,
                     CategoryDesc = productByCategory.Category.Description,
+                    SubCategoryId = productByCategory.SubCategoryId,
+                    SubCategoryName = productByCategory.SubCategory?.Name,
                     ShopId = productByCategory.ShopId,
                     ShopName = productByCategory.Shop.Name,
                     ShopDesc = productByCategory.Shop.Description,
@@ -134,29 +139,32 @@ namespace ETicaret_Infrastructure.Data.Repositories
         }
         public async Task<List<ProductDTO>?> GetByShopIdAsync(int shopId)
         {
-            var productsByCategory = await _context.Products
+            var productsByShop = await _context.Products
                 .Where(x => x.ShopId == shopId && !x.IsDelete)
                 .Include(x => x.Category)
                 .Include(x => x.Shop)
+                .Include(x => x.SubCategory)
                 .ToListAsync();
             List<ProductDTO> products = new List<ProductDTO>();
-            foreach (var productByCategory in productsByCategory)
+            foreach (var productByShop in productsByShop)
             {
                 products.Add(new ProductDTO
                 {
-                    Id = productByCategory.Id,
-                    CategoryId = productByCategory.CategoryId,
-                    CategoryName = productByCategory.Category.Name,
-                    CategoryDesc = productByCategory.Category.Description,
-                    ShopId = productByCategory.ShopId,
-                    ShopName = productByCategory.Shop.Name,
-                    ShopDesc = productByCategory.Shop.Description,
-                    Name = productByCategory.Name,
-                    Description = productByCategory.Description,
-                    Stock = productByCategory.Stock,
-                    Price = productByCategory.Price,
-                    ImageUrl = productByCategory.ImageUrl,
-                    IsDelete = productByCategory.IsDelete,
+                    Id = productByShop.Id,
+                    CategoryId = productByShop.CategoryId,
+                    CategoryName = productByShop.Category.Name,
+                    CategoryDesc = productByShop.Category.Description,
+                    SubCategoryId = productByShop.SubCategoryId,
+                    SubCategoryName = productByShop.SubCategory?.Name,
+                    ShopId = productByShop.ShopId,
+                    ShopName = productByShop.Shop.Name,
+                    ShopDesc = productByShop.Shop.Description,
+                    Name = productByShop.Name,
+                    Description = productByShop.Description,
+                    Stock = productByShop.Stock,
+                    Price = productByShop.Price,
+                    ImageUrl = productByShop.ImageUrl,
+                    IsDelete = productByShop.IsDelete,
                 });
             }
             return products;
@@ -195,6 +203,8 @@ namespace ETicaret_Infrastructure.Data.Repositories
                 CategoryId = response.CategoryId,
                 CategoryName = response.Category.Name,
                 CategoryDesc = response.Category.Description,
+                SubCategoryId = response.SubCategoryId,
+                SubCategoryName = response.SubCategory?.Name,
                 ShopId = response.ShopId,
                 ShopName = response.Shop.Name,
                 ShopDesc = response.Shop.Description,
@@ -228,6 +238,7 @@ namespace ETicaret_Infrastructure.Data.Repositories
                 oldProduct.CategoryId = product.CategoryId;
                 oldProduct.Name = product.Name;
                 oldProduct.Description = product.Description;
+                oldProduct.SubCategoryId = product.SubCategoryId;
                 oldProduct.Stock = product.Stock;
                 oldProduct.Price = product.Price;
                 oldProduct.ImageUrl = product.ImageUrl;

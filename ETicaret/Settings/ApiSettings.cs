@@ -90,5 +90,18 @@
 
 
         #endregion
+
+        #region ProductSubCategories
+        public int subCategoryId { get; set; }
+
+        public string GetSubCategories => $"{BaseUrl}ProductSubCategory";
+        public string AddSubCategory => $"{BaseUrl}ProductSubCategory";
+        public string GetByIdSubCategory => $"{BaseUrl}ProductSubCategory/{subCategoryId}";
+        public string UpdateSubCategory => $"{BaseUrl}ProductSubCategory/{subCategoryId}";
+        public string DeleteSubCategory => $"{BaseUrl}ProductSubCategory/{subCategoryId}";
+        public string GetSubCategoriesByCategory => $"{BaseUrl}ProductSubCategory/GetByCategory/{categoryId}";
+
+        #endregion
+
     }
 }
