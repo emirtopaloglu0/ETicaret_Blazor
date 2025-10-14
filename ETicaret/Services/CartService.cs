@@ -35,6 +35,7 @@ namespace ETicaret_UI.Services
 
         public async Task InitializeAsync(string id)
         {
+
             userId = id;
 
             var result = await _protectedSessionStorage.GetAsync<List<CartItemViewModal>>(GetCartKeyForUser(userId));
@@ -42,6 +43,7 @@ namespace ETicaret_UI.Services
             {
                 _items.Clear();
                 _items.AddRange(result.Value);
+                await GuestCartToUserCart();
                 NotifyChanged();
             }
             else if (result.Value == null && userId != null)
@@ -50,31 +52,37 @@ namespace ETicaret_UI.Services
 
                 _apiSettings.userId = userId;
 
-                var isUserHaveCartItems = await _requestManager.GetAsync<bool>(_apiSettings.IsUserHaveCartItems);
+                //var isUserHaveCartItems = await _requestManager.GetAsync<bool>(_apiSettings.IsUserHaveCartItems);
 
-                if (!isUserHaveCartItems)
-                {
-                    var guestCartCheck = await _protectedSessionStorage.GetAsync<List<CartItemViewModal>>(GetCartKeyForUser(string.Empty));
-                    if (guestCartCheck.Success && guestCartCheck.Value != null)
-                    {
-                        foreach (var item in guestCartCheck.Value)
-                        {
-                            await AddToCart(item.Product, item.Quantity);
-                        }
-                    }
-                    await _protectedSessionStorage.DeleteAsync(GetCartKeyForUser(string.Empty));
-                    return;
-                }
+                //if (!isUserHaveCartItems)
+                //{
 
+                //return;
+                //}
                 var response = await _requestManager.GetAsync<List<CartItemViewModal>>(_apiSettings.GetCartItemByUserId);
                 _apiSettings.userId = string.Empty;
                 if (response != null)
                 {
                     _items.AddRange(response);
+                    await GuestCartToUserCart();
                     await SaveAsync();
-                    return;
                 }
             }
+        }
+
+        private async Task GuestCartToUserCart()
+        {
+            var guestCartCheck = await _protectedSessionStorage.GetAsync<List<CartItemViewModal>>(GetCartKeyForUser(string.Empty));
+            if (guestCartCheck.Success && guestCartCheck.Value != null)
+            {
+                foreach (var item in guestCartCheck.Value)
+                {
+                    await AddToCart(item.Product, item.Quantity);
+                }
+            }
+            await _protectedSessionStorage.DeleteAsync(GetCartKeyForUser(string.Empty));
+            await Task.Delay(500);
+            await _protectedSessionStorage.DeleteAsync(GetCartKeyForUser(userId));
         }
 
         public async Task AddToCart(ProductViewModel product, int quantity = 1)
@@ -89,7 +97,7 @@ namespace ETicaret_UI.Services
                     var userCartItems = await _requestManager.GetAsync<List<CartItemViewModal>>(_apiSettings.GetCartItemByUserId);
                     foreach (var item in userCartItems)
                     {
-                        if (item.UserId == Convert.ToInt32(userId) && item.ProductId == existing.ProductId)
+                        if (item.UserId == Convert.ToInt32(userId) && item.ProductId == existing.Product.Id)
                         {
                             _apiSettings.cartItemId = item.Id;
                             var response = await _requestManager.PutAsync<int, bool>(_apiSettings.UpdateCartItem, existing.Quantity);
@@ -137,7 +145,7 @@ namespace ETicaret_UI.Services
                     var userCartItems = await _requestManager.GetAsync<List<CartItemViewModal>>(_apiSettings.GetCartItemByUserId);
                     foreach (var item2 in userCartItems)
                     {
-                        if (item2.UserId == Convert.ToInt32(userId) && item2.ProductId == item.ProductId)
+                        if (item2.UserId == Convert.ToInt32(userId) && item2.ProductId == item.Product.Id)
                         {
                             _apiSettings.cartItemId = item2.Id;
                             await _requestManager.DeleteAsync(_apiSettings.DeleteCartItem);
@@ -170,7 +178,7 @@ namespace ETicaret_UI.Services
                         var userCartItems = await _requestManager.GetAsync<List<CartItemViewModal>>(_apiSettings.GetCartItemByUserId);
                         foreach (var item2 in userCartItems)
                         {
-                            if (item2.UserId == Convert.ToInt32(userId) && item2.ProductId == item.ProductId)
+                            if (item2.UserId == Convert.ToInt32(userId) && item2.ProductId == item.Product.Id)
                             {
                                 _apiSettings.cartItemId = item2.Id;
                                 var response = await _requestManager.PutAsync<int, bool>(_apiSettings.UpdateCartItem, quantity);
@@ -189,8 +197,11 @@ namespace ETicaret_UI.Services
         {
 
             _apiSettings.userId = userId;
-            await _requestManager.DeleteAsync(_apiSettings.ClearCart);
-            _apiSettings.userId = string.Empty;
+            if (userId != null)
+            {
+                await _requestManager.DeleteAsync(_apiSettings.ClearCart);
+                _apiSettings.userId = string.Empty;
+            }
             _items.Clear();
             await _protectedSessionStorage.DeleteAsync(GetCartKeyForUser(userId));
             NotifyChanged();
