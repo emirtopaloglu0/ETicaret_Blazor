@@ -60,5 +60,30 @@ Her sayfada tablolardan CRUD işlemleri yapılmaktadır. Detaylıca eklenmeme se
 <img width="1920" height="947" alt="10 Kargocu Panel" src="https://github.com/user-attachments/assets/cd27b650-b7d1-433e-8527-5cca3538f7e6" />
 
 
+## Proje Kullanımı İçin Notlar
+
+appsettings.json dosyası OPENAI güvenlik gerekçesiyle yüklenmiyor. Onun yerine kendiniz oluşturup şunu yazabilirsiniz.
+
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": ""
+  },
+  "Jwt": {
+    "Key": "",
+    "Issuer": "ETicaretAPI",
+    "Audience": "ETicaretClient"
+  },
+  "OpenAI": {
+    "ApiKey": "",
+    "Model": "gpt-4o-mini"
+  }
+}
 
 
