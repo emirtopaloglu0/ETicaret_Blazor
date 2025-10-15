@@ -16,6 +16,7 @@ namespace ETicaret_UI.Services
 
         private string userId = string.Empty;
         private readonly ProtectedSessionStorage _protectedSessionStorage;
+        private readonly ProtectedLocalStorage _protectedLocalStorage;
         private readonly RequestManager _requestManager;
         private readonly ApiSettings _apiSettings;
         private readonly List<CartItemViewModal> _items = new();
@@ -23,12 +24,15 @@ namespace ETicaret_UI.Services
         public IReadOnlyList<CartItemViewModal> Items => _items;
         public event Action? OnChange;
 
-        public CartService(ProtectedSessionStorage protectedSessionStorage, RequestManager requestManager, ApiSettings apiSettings)
+        public CartService(ProtectedSessionStorage protectedSessionStorage
+            , ProtectedLocalStorage protectedLocalStorage, RequestManager requestManager, ApiSettings apiSettings)
         {
             _protectedSessionStorage = protectedSessionStorage;
             _requestManager = requestManager;
             _apiSettings = apiSettings;
+            _protectedLocalStorage = protectedLocalStorage;
         }
+
 
         public int TotalCount => _items.Sum(i => i.Quantity);
         public decimal TotalAmount => _items.Sum(i => i.Product.Price * i.Quantity);
@@ -37,8 +41,14 @@ namespace ETicaret_UI.Services
         {
 
             userId = id;
-
+            var cartKey = GetCartKeyForUser(userId);
             var result = await _protectedSessionStorage.GetAsync<List<CartItemViewModal>>(GetCartKeyForUser(userId));
+
+            if (cartKey == "guest_cart")
+            {
+                result = await _protectedLocalStorage.GetAsync<List<CartItemViewModal>>(GetCartKeyForUser(userId));
+            }
+
             if (result.Success && result.Value != null)
             {
                 _items.Clear();
@@ -51,14 +61,6 @@ namespace ETicaret_UI.Services
                 _items.Clear();
 
                 _apiSettings.userId = userId;
-
-                //var isUserHaveCartItems = await _requestManager.GetAsync<bool>(_apiSettings.IsUserHaveCartItems);
-
-                //if (!isUserHaveCartItems)
-                //{
-
-                //return;
-                //}
                 var response = await _requestManager.GetAsync<List<CartItemViewModal>>(_apiSettings.GetCartItemByUserId);
                 _apiSettings.userId = string.Empty;
                 if (response != null)
@@ -72,7 +74,7 @@ namespace ETicaret_UI.Services
 
         private async Task GuestCartToUserCart()
         {
-            var guestCartCheck = await _protectedSessionStorage.GetAsync<List<CartItemViewModal>>(GetCartKeyForUser(string.Empty));
+            var guestCartCheck = await _protectedLocalStorage.GetAsync<List<CartItemViewModal>>(GetCartKeyForUser(string.Empty));
             if (guestCartCheck.Success && guestCartCheck.Value != null)
             {
                 foreach (var item in guestCartCheck.Value)
@@ -80,7 +82,7 @@ namespace ETicaret_UI.Services
                     await AddToCart(item.Product, item.Quantity);
                 }
             }
-            await _protectedSessionStorage.DeleteAsync(GetCartKeyForUser(string.Empty));
+            await _protectedLocalStorage.DeleteAsync(GetCartKeyForUser(string.Empty));
             await Task.Delay(500);
             await _protectedSessionStorage.DeleteAsync(GetCartKeyForUser(userId));
         }
@@ -203,13 +205,29 @@ namespace ETicaret_UI.Services
                 _apiSettings.userId = string.Empty;
             }
             _items.Clear();
-            await _protectedSessionStorage.DeleteAsync(GetCartKeyForUser(userId));
+            var cartKey = GetCartKeyForUser(userId);
+            if (cartKey == "guest_cart")
+            {
+                await _protectedLocalStorage.DeleteAsync(GetCartKeyForUser(userId));
+            }
+            else
+            {
+                await _protectedSessionStorage.DeleteAsync(GetCartKeyForUser(userId));
+            }
             NotifyChanged();
         }
 
         private async Task SaveAsync()
         {
-            await _protectedSessionStorage.SetAsync(GetCartKeyForUser(userId), _items);
+            var cartKey = GetCartKeyForUser(userId);
+            if ("guest_cart" == cartKey)
+            {
+                await _protectedLocalStorage.SetAsync(GetCartKeyForUser(userId), _items);
+            }
+            else
+            {
+                await _protectedSessionStorage.SetAsync(GetCartKeyForUser(userId), _items);
+            }
             NotifyChanged();
         }
 
