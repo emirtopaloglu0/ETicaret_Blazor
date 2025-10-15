@@ -62,8 +62,8 @@ Her sayfada tablolardan CRUD işlemleri yapılmaktadır. Detaylıca eklenmeme se
 
 ## Proje Kullanımı İçin Notlar
 
-appsettings.json dosyası OPENAI güvenlik gerekçesiyle yüklenmiyor. Onun yerine kendiniz oluşturup şunu yazabilirsiniz.
-
+appsettings.json dosyası OPENAI güvenlik gerekçesiyle yüklenmiyor. Onun yerine dosyayı ve OpenAI secret key'i kendiniz oluşturup şunu yazabilirsiniz.
+```
 {
   "Logging": {
     "LogLevel": {
@@ -85,5 +85,5 @@ appsettings.json dosyası OPENAI güvenlik gerekçesiyle yüklenmiyor. Onun yeri
     "Model": "gpt-4o-mini"
   }
 }
-
+```
 
