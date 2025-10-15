@@ -139,11 +139,22 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Kategori</label>
-                            <select class="form-select" @bind="productForm.CategoryId">
+                            <select class="form-select" @bind="productForm.CategoryId"
+                                    @bind:after="() => ParentCategoryChanged(productForm.CategoryId)">
                                 <option value=0>--Boş--</option>
                                 @foreach (var category in categories)
                                 {
                                     <option value=@category.Id>@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Alt Kategoriler</label>
+                            <select class="form-select" @bind="productForm.SubCategoryId">
+                                <option value=0>--Boş--</option>
+                                @foreach (var subCategory in subCategories)
+                                {
+                                    <option value=@subCategory.Id>@subCategory.Name</option>
                                 }
                             </select>
                         </div>
@@ -292,7 +303,7 @@
     [Parameter] public string protectedShopId { get; set; }
 
     int shopId;
-    List<ProductViewModel> products = new();
+    List<ProductViewModel>? products = new();
     List<string> availableImages = new();
     bool canManageProducts = false;
 
@@ -302,11 +313,12 @@
     string modalTitle = "";
     bool showDescModal = false;
     ProductViewModel? selectedProduct;
-    ProductViewModel productForm = new();
+    ProductViewModel? productForm = new();
     ShopUserViewModal? shopUser = new();
     LoggedUserViewModel? user = new();
-    List<CategoryViewModel> categories = new();
-    ShopViewModal shop = new();
+    List<CategoryViewModel>? categories = new();
+    List<ProductSubCategoryViewModal>? subCategories = new();
+    ShopViewModal? shop = new();
 
     int currentPage = 1;
     int pageSize = 8; // sayfa başına ürün
@@ -347,6 +359,8 @@
             products = await RequestManager.GetAsync<List<ProductViewModel>>(ApiSettings.GetProductsByShopId);
             ApiSettings.shopId = 0;
             categories = await RequestManager.GetAsync<List<CategoryViewModel>>(ApiSettings.GetCategories);
+            subCategories = await RequestManager.GetAsync<List<ProductSubCategoryViewModal>>(ApiSettings.GetSubCategories);
+
 
             var http = new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
             availableImages = await http.GetFromJsonAsync<List<string>>("uploads/list") ?? new();
@@ -373,11 +387,13 @@
             Name = product.Name,
             Description = product.Description,
             CategoryId = product.CategoryId,
+            SubCategoryId = product.SubCategoryId,
             CategoryName = product.CategoryName,
             Stock = product.Stock,
             Price = product.Price,
             ImageUrl = product.ImageUrl
         };
+        await ParentCategoryChanged(product.CategoryId);
         ApiSettings.productId = product.Id;
         var images = await RequestManager.GetAsync<List<ProductImageViewModal>>(ApiSettings.GetProductImage);
         ApiSettings.productId = 0;
@@ -413,6 +429,7 @@
             var payload = new
             {
                 CategoryId = productForm.CategoryId,
+                SubCategoryId = productForm.SubCategoryId,
                 ShopId = shopId,
                 Name = productForm.Name,
                 Description = productForm.Description,
@@ -452,6 +469,7 @@
             var payload = new
             {
                 CategoryId = productForm.CategoryId,
+                SubCategoryId = productForm.SubCategoryId,
                 ShopId = shopId,
                 Name = productForm.Name,
                 Description = productForm.Description,
@@ -653,7 +671,12 @@
     }
 
 
-
+    private async Task ParentCategoryChanged(int categoryId)
+    {
+        ApiSettings.categoryId = categoryId;
+        subCategories = await RequestManager.GetAsync<List<ProductSubCategoryViewModal>>(ApiSettings.GetSubCategoriesByCategory);
+        ApiSettings.categoryId = 0;
+    }
 
 
 }

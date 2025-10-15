@@ -90,5 +90,31 @@
 
 
         #endregion
+
+        #region ProductSubCategories
+        public int subCategoryId { get; set; }
+
+        public string GetSubCategories => $"{BaseUrl}ProductSubCategory";
+        public string AddSubCategory => $"{BaseUrl}ProductSubCategory";
+        public string GetByIdSubCategory => $"{BaseUrl}ProductSubCategory/{subCategoryId}";
+        public string UpdateSubCategory => $"{BaseUrl}ProductSubCategory/{subCategoryId}";
+        public string DeleteSubCategory => $"{BaseUrl}ProductSubCategory/{subCategoryId}";
+        public string GetSubCategoriesByCategory => $"{BaseUrl}ProductSubCategory/GetByCategory/{categoryId}";
+
+        #endregion
+
+        #region CartItem
+        public int cartItemId { get; set; }
+
+        public string AddCartItem => $"{BaseUrl}CartItem";
+        public string GetCartItemByUserId => $"{BaseUrl}CartItem/{userId}";
+        public string UpdateCartItem => $"{BaseUrl}CartItem/{cartItemId}";
+        public string DeleteCartItem => $"{BaseUrl}CartItem/{cartItemId}";
+        public string IsUserHaveCartItems => $"{BaseUrl}CartItem/IsUserHaveCartItems/{userId}";
+        public string ClearCart => $"{BaseUrl}CartItem/ClearCart/{userId}";
+
+
+        #endregion
+
     }
 }

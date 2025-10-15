@@ -8,6 +8,7 @@
 
 <div class="container my-4">
 
+    <!-- Toastlar -->
     <BlazoredToasts Position="ToastPosition.BottomRight"
                     Timeout="10"
                     ShowCloseButton="@true"
@@ -17,14 +18,22 @@
                     SuccessIcon="fa fa-thumbs-up"
                     ErrorIcon="fa fa-bug" />
 
-    <!-- Filtreleme Alanı -->
+    <!-- 🔽 Kategori & Filtreleme -->
     <div class="row mb-4 align-items-center">
         <div class="col-md-3 col-sm-12 mb-2">
-            <select class="form-select" @bind="selectedCategory">
+            <select class="form-select" @onchange="OnCategoryChanged">
                 <option value="">Tüm Kategoriler</option>
                 @foreach (var cat in categories)
                 {
-                    <option value="@cat">@cat</option>
+                    <option value="@cat.Id">@cat.Name</option>
+
+                    @if (subCategories.Any(sc => sc.CategoryId == cat.Id))
+                    {
+                        @foreach (var sub in subCategories.Where(sc => sc.CategoryId == cat.Id))
+                        {
+                            <option value="sub-@sub.Id">-- @sub.Name</option>
+                        }
+                    }
                 }
             </select>
         </div>
@@ -51,7 +60,7 @@
         </div>
     </div>
 
-    <!-- Ürün Kartları -->
+    <!-- 🔹 Ürünler -->
     <div class="row g-4">
         @foreach (var item in pagedProducts)
         {
@@ -82,12 +91,10 @@
                             }
                         </div>
 
-                        <!-- Mağaza Linki -->
                         <a class="text-secondary small mt-2 text-decoration-none d-block" href="magaza/@MaskService.Encode(@item.ShopId)">
                             <i class="bi bi-shop"></i> @item.ShopName Mağazası
                         </a>
 
-                        <!-- Ürün Detayına Git Butonu -->
                         <a href="/urun-detay/@MaskService.Encode(item.Id)"
                            class="btn btn-sm btn-outline-dark mt-2 w-100">
                             <i class="bi bi-info-circle"></i> Ürün Detayına Git
@@ -98,7 +105,7 @@
         }
     </div>
 
-    <!-- Sayfalama -->
+    <!-- 🔹 Sayfalama -->
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center mt-4">
             <li class="page-item @(currentPage == 1 ? "disabled" : "")">
@@ -117,7 +124,6 @@
         </ul>
     </nav>
 </div>
-
 
 <style>
     .product-card {
@@ -139,12 +145,12 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
-
 </style>
 
 @code {
     List<ProductViewModel> products = new();
-    List<string> categories = new();
+    List<CategoryViewModel> categories = new();
+    List<ProductSubCategoryViewModal> subCategories = new();
     List<string> shops = new();
 
     string selectedCategory = "";
@@ -157,7 +163,7 @@
 
     IEnumerable<ProductViewModel> filteredProducts =>
         products
-        .Where(p => string.IsNullOrEmpty(selectedCategory) || p.CategoryName == selectedCategory)
+        .Where(p => FilterByCategory(p))
         .Where(p => string.IsNullOrEmpty(selectedShop) || p.ShopName == selectedShop)
         .Where(p => string.IsNullOrEmpty(searchQuery) ||
                     p.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
@@ -168,12 +174,37 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender) return;
+
+        products = await RequestManager.GetAsync<List<ProductViewModel>>(ApiSettings.Products);
+        categories = await RequestManager.GetAsync<List<CategoryViewModel>>(ApiSettings.GetCategories);
+        subCategories = await RequestManager.GetAsync<List<ProductSubCategoryViewModal>>(ApiSettings.GetSubCategories);
+
+        shops = products.Select(p => p.ShopName).Distinct().OrderBy(x => x).ToList();
+
+        StateHasChanged();
+    }
+
+    void OnCategoryChanged(ChangeEventArgs e)
+    {
+        selectedCategory = e.Value?.ToString() ?? "";
+        currentPage = 1;
+    }
+
+    bool FilterByCategory(ProductViewModel p)
+    {
+        if (string.IsNullOrEmpty(selectedCategory))
+            return true;
+
+        if (selectedCategory.StartsWith("sub-"))
         {
-            products = await RequestManager.GetAsync<List<ProductViewModel>>(ApiSettings.Products);
-            categories = products.Select(p => p.CategoryName).Distinct().OrderBy(x => x).ToList();
-            shops = products.Select(p => p.ShopName).Distinct().OrderBy(x => x).ToList();
-            StateHasChanged();
+            var subId = int.Parse(selectedCategory.Replace("sub-", ""));
+            return p.SubCategoryId == subId;
+        }
+        else
+        {
+            var catId = int.Parse(selectedCategory);
+            return p.CategoryId == catId;
         }
     }
 

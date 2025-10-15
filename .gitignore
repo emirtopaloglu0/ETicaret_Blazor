@@ -365,3 +365,4 @@ FodyWeavers.xsd
 
 ETicaret_API/appsettings.json
 ETicaret_API/appsettings.*.json
+/ETicaret_API/appsettings.json

@@ -3,12 +3,12 @@
 @implements IDisposable
 
 <div class="dropdown ms-4">
-    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" id="dropdownMenuClickableInside" data-bs-auto-close="outside" aria-expanded="false">
         <i class="bi bi-cart"></i>
         <span class="ms-1">Sepet</span>
         <span class="badge bg-danger ms-2">@CartService.TotalCount</span>
     </button>
-    <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 320px;">
+    <div class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="dropdownMenuClickableInside" style="min-width: 320px;">
         @if (CartService.Items.Count == 0)
         {
             <div class="text-center p-3">Sepetiniz boş</div>
@@ -18,7 +18,7 @@
             @foreach (var it in CartService.Items)
             {
                 <div class="d-flex align-items-center mb-2">
-                    <img src="@(!string.IsNullOrEmpty(it.Product.ImageUrl) ? it.Product.ImageUrl : "https://via.placeholder.com/64")"
+                    <img src="@(!string.IsNullOrEmpty(it.Product?.ImageUrl) ? it.Product.ImageUrl : "https://via.placeholder.com/64")"
                          style="width:60px;height:60px;object-fit:cover;border-radius:4px" />
                     <div class="ms-2 flex-grow-1">
                         <div class="fw-bold">@it.Product.Name</div>
@@ -54,6 +54,14 @@
 </div>
 
 @code {
+    IReadOnlyList<CartItemViewModal> cartItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cartItems = CartService.Items;
+        StateHasChanged();
+    }
+
     protected override void OnInitialized()
     {
         // UI güncellemesi için abone ol
@@ -68,6 +76,7 @@
     async Task UpdateQuantity(int productId, int quantity)
     {
         await CartService.UpdateQuantity(productId, quantity);
+        StateHasChanged();
     }
 
     async Task RemoveItem(int productId)

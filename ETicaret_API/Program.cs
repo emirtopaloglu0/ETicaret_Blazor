@@ -30,6 +30,8 @@ builder.Services.AddScoped<IProductCategoryRepository, EfProductCategoryReposito
 builder.Services.AddScoped<IDeliveryCompanyRepository, EfDeliveryCompanyRepository>();
 builder.Services.AddScoped<IShopRepository, EfShopRepository>();
 builder.Services.AddScoped<IProductImageRepository, EfProductImageRepository>();
+builder.Services.AddScoped<IProductSubCategoryRepository, EfProductSubCategories>();
+builder.Services.AddScoped<ICartItemRepository, EfCartItemRepository>();
 
 // HttpContext’e erişim için
 builder.Services.AddHttpContextAccessor();

@@ -1,7 +1,7 @@
 ﻿@page "/odeme"
 @using ETicaret_UI.Services
 @using ETicaret_UI.ViewModals
-@inject CartService CartService
+@* @inject CartService CartService *@
 @rendermode InteractiveServer
 @attribute [StreamRendering]
 
@@ -128,7 +128,8 @@
 </div>
 
 @code {
-    IReadOnlyList<CartService.CartItem> cartItems;
+
+    IReadOnlyList<CartItemViewModal> cartItems;
     List<DeliveryCompanyViewModel> deliveryCompanies = new();
 
     int companyId = 0;
@@ -145,8 +146,9 @@
     {
         if (firstRender)
         {
+            CartService.OnChange += HandleCartChanged;
             user = await RequestManager.GetAsync<LoggedUserViewModel>(ApiSettings.GetCurrentUser);
-            address = user.Address;
+            address = user?.Address;
             StateHasChanged();
             var response = await RequestManager.GetAsync<List<DeliveryCompanyViewModel>>(ApiSettings.GetCompanies);
             if (response != null)
@@ -156,15 +158,21 @@
             }
         }
     }
+    private void HandleCartChanged()
+    {
+        cartItems = CartService.Items;
+        InvokeAsync(StateHasChanged);
+    }
 
     public void Dispose()
     {
-        CartService.OnChange -= StateHasChanged;
+        CartService.OnChange -= HandleCartChanged;
     }
 
     async Task UpdateQuantity(int productId, int quantity)
     {
         await CartService.UpdateQuantity(productId, quantity);
+        StateHasChanged();
     }
 
     async Task CompeleteOrder()
