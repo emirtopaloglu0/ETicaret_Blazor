@@ -33,13 +33,11 @@ namespace ETicaret_UI.Services
             _protectedLocalStorage = protectedLocalStorage;
         }
 
-
         public int TotalCount => _items.Sum(i => i.Quantity);
         public decimal TotalAmount => _items.Sum(i => i.Product.Price * i.Quantity);
 
         public async Task InitializeAsync(string id)
         {
-
             userId = id;
             var cartKey = GetCartKeyForUser(userId);
             var result = await _protectedSessionStorage.GetAsync<List<CartItemViewModal>>(GetCartKeyForUser(userId));
@@ -74,6 +72,10 @@ namespace ETicaret_UI.Services
 
         private async Task GuestCartToUserCart()
         {
+            if ("guest_cart" == GetCartKeyForUser(userId))
+            {
+                return;
+            }
             var guestCartCheck = await _protectedLocalStorage.GetAsync<List<CartItemViewModal>>(GetCartKeyForUser(string.Empty));
             if (guestCartCheck.Success && guestCartCheck.Value != null)
             {
@@ -132,7 +134,6 @@ namespace ETicaret_UI.Services
                     _items.Add(new CartItemViewModal { Product = product, Quantity = quantity });
                 }
             }
-
             await SaveAsync();
         }
 
