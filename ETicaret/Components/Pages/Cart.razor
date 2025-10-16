@@ -77,14 +77,17 @@
     {
         await CartService.UpdateQuantity(productId, quantity);
         StateHasChanged();
+        ToastService.ShowSuccess("Ürün sayısı değiştirildi!");
     }
 
     async Task RemoveItem(int productId)
     {
         await CartService.RemoveFromCart(productId);
+        ToastService.ShowSuccess("Ürün Silindi");
     }
     async Task ClearCart()
     {
         await CartService.Clear();
+        ToastService.ShowSuccess("Sepet Temezlendi!");
     }
 }

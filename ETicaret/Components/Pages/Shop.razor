@@ -450,8 +450,6 @@
                     });
                 }
                 await RequestManager.PostAsync<List<ProductImageViewModal>, string>(ApiSettings.AddProductImage, productImageList);
-
-
             }
             ToastService.ShowSuccess("Ürün eklendi");
             await CloseModal();
@@ -510,16 +508,13 @@
             }
             ApiSettings.productId = 0;
 
-
             ToastService.ShowSuccess("Ürün güncellendi");
-
             await CloseModal();
         }
         catch
         {
             ToastService.ShowError("Bekelnmeyen Bir Hata Oluştu");
         }
-
     }
 
     async Task DeleteProduct()
@@ -646,18 +641,6 @@
                 var url = await response.Content.ReadAsStringAsync();
                 var cleanUrl = url.Trim('"');
                 productForm.OtherImages.Add(cleanUrl);
-
-                // // Backend'e kaydet (ProductImage tablosuna)
-                // if (modalMode == "edit" || modalMode == "add")
-                // {
-                //     var payload = new
-                //     {
-                //         ProductId = productForm.Id,
-                //         ImageUrl = cleanUrl
-                //     };
-
-                //     await RequestManager.PostAsync<object, string>(ApiSettings.AddProductImage, payload);
-                // }
             }
         }
 
